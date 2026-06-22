@@ -53,6 +53,9 @@ class Config:
     # Hour (0-23, local time) at which the day's activity is written to a log
     # file and the live stats are reset for a fresh day.
     rollover_hour: int = field(default_factory=lambda: _env_int("IDS_ROLLOVER_HOUR", 23))
+    # Archived daily reports older than this many days are deleted automatically
+    # (at each rollover and on startup). 0 disables pruning.
+    log_retention_days: int = field(default_factory=lambda: _env_int("IDS_LOG_RETENTION_DAYS", 90))
 
     # Retention / limits
     max_recent_packets: int = field(default_factory=lambda: _env_int("IDS_MAX_RECENT_PACKETS", 500))

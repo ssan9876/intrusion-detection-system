@@ -154,8 +154,9 @@
     try {
       const d = await (await fetch("/api/logs")).json();
       const nxt = new Date(d.next_rollover);
+      const keep = d.retention_days ? ` · kept ${d.retention_days} days` : "";
       $("rollover-info").textContent =
-        `Rolls over daily at ${String(d.rollover_hour).padStart(2, "0")}:00 — next ${nxt.toLocaleString("en-US", { hour12: false })}`;
+        `Rolls over daily at ${String(d.rollover_hour).padStart(2, "0")}:00 — next ${nxt.toLocaleString("en-US", { hour12: false })}${keep}`;
       const box = $("logs-list");
       box.innerHTML = d.logs.map((l) => {
         const n = encodeURIComponent(l.name);

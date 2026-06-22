@@ -258,6 +258,26 @@ class Store:
         self.reset()
         return txt_path
 
+    @staticmethod
+    def prune_logs(log_dir: Path, retention_days: int) -> list[str]:
+        """Delete archived reports older than retention_days. Returns names removed.
+
+        retention_days <= 0 disables pruning. Files are matched by modification
+        time so both the .txt and .json (and any legacy .log) are covered.
+        """
+        if retention_days <= 0 or not log_dir.is_dir():
+            return []
+        cutoff = time.time() - retention_days * 86400
+        removed: list[str] = []
+        for p in log_dir.glob("nids-*"):
+            try:
+                if p.is_file() and p.stat().st_mtime < cutoff:
+                    p.unlink()
+                    removed.append(p.name)
+            except OSError:
+                continue
+        return removed
+
     def query_alerts(self, limit: int = 200, severity: str | None = None, since: float | None = None) -> list[dict]:
         sql = "SELECT * FROM alerts"
         clauses: list[str] = []

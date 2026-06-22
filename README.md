@@ -113,6 +113,9 @@ The dashboard's **Daily Reports** card lists archives newest-first. Click a name
 `POST /api/rollover` (trigger immediately). In the recommended deployment
 `IDS_LOG_DIR` lives on TrueNAS, so reports are retained on the NAS.
 
+Reports older than `IDS_LOG_RETENTION_DAYS` (default **90**) are pruned
+automatically at each rollover and on startup; set it to `0` to keep forever.
+
 ## Deployment
 
 See [`deploy/README-proxmox.md`](deploy/README-proxmox.md) for running this as a

@@ -85,6 +85,10 @@ def create_app(config: Config) -> FastAPI:
     async def _startup() -> None:
         hub.loop = asyncio.get_running_loop()
         sensor.start()
+        # prune stale reports once at startup
+        pruned = store.prune_logs(config.log_dir, config.log_retention_days)
+        if pruned:
+            print(f"[prune] removed {len(pruned)} report file(s) older than {config.log_retention_days}d")
         app.state.pusher = asyncio.create_task(_push_snapshots())
         app.state.roller = asyncio.create_task(_daily_rollover())
 
@@ -108,6 +112,9 @@ def create_app(config: Config) -> FastAPI:
             try:
                 path = store.export_and_reset(config.log_dir)
                 print(f"[rollover] wrote daily log {path}; stats reset")
+                pruned = store.prune_logs(config.log_dir, config.log_retention_days)
+                if pruned:
+                    print(f"[prune] removed {len(pruned)} report file(s) older than {config.log_retention_days}d")
                 await hub.broadcast({"type": "rollover", "file": path.name})
             except Exception as exc:  # never let the loop die
                 print(f"[rollover] failed: {exc!r}")
@@ -148,6 +155,7 @@ def create_app(config: Config) -> FastAPI:
         return {
             "rollover_hour": config.rollover_hour,
             "next_rollover": nxt.isoformat(timespec="seconds"),
+            "retention_days": config.log_retention_days,
             "log_dir": str(config.log_dir),
             "logs": logs,
         }
