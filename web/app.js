@@ -157,11 +157,42 @@
       $("rollover-info").textContent =
         `Rolls over daily at ${String(d.rollover_hour).padStart(2, "0")}:00 — next ${nxt.toLocaleString("en-US", { hour12: false })}`;
       const box = $("logs-list");
-      box.innerHTML = d.logs.map((l) =>
-        `<div class="log-item"><a href="/api/logs/${encodeURIComponent(l.name)}" target="_blank">${escapeHtml(l.name)}</a><span class="log-size">${fmtBytes(l.size)}</span></div>`
-      ).join("") || `<div class="muted">no archived days yet</div>`;
+      box.innerHTML = d.logs.map((l) => {
+        const n = encodeURIComponent(l.name);
+        const jsonLink = l.json
+          ? `<a href="/api/logs/${encodeURIComponent(l.json)}?download=1" title="Download JSON">.json</a>` : "";
+        return `<div class="log-item">
+          <span class="log-name" data-log="${escapeHtml(l.name)}" title="View report">${escapeHtml(l.name)}</span>
+          <span class="log-meta">
+            <span class="log-size">${fmtBytes(l.size)}</span>
+            <span class="log-act" data-log="${escapeHtml(l.name)}">View</span>
+            <a href="/api/logs/${n}?download=1" title="Download .txt">Download</a>
+            ${jsonLink}
+          </span>
+        </div>`;
+      }).join("") || `<div class="muted">no archived days yet — they appear after the daily rollover (or click “Roll over now”)</div>`;
     } catch (e) { /* ignore */ }
   }
+
+  async function openLog(name) {
+    $("modal-title").textContent = name;
+    $("modal-body").textContent = "loading…";
+    $("modal-download").href = `/api/logs/${encodeURIComponent(name)}?download=1`;
+    $("log-modal").hidden = false;
+    try {
+      const txt = await (await fetch(`/api/logs/${encodeURIComponent(name)}`)).text();
+      $("modal-body").textContent = txt;
+    } catch (e) { $("modal-body").textContent = "failed to load log"; }
+  }
+  function closeLog() { $("log-modal").hidden = true; }
+
+  $("logs-list").addEventListener("click", (e) => {
+    const el = e.target.closest("[data-log]");
+    if (el) openLog(el.dataset.log);
+  });
+  $("modal-close").addEventListener("click", closeLog);
+  $("log-modal").addEventListener("click", (e) => { if (e.target.id === "log-modal") closeLog(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLog(); });
 
   $("rollover-btn").addEventListener("click", async () => {
     if (!confirm("Archive today's activity to a log file and reset live stats now?")) return;

@@ -240,23 +240,23 @@ class Store:
             self.started_at = time.time()
 
     def export_and_reset(self, log_dir: Path) -> Path:
-        """Write the day's report (JSON + readable .log) to log_dir, then reset.
+        """Write the day's report (readable .txt + structured .json), then reset.
 
-        Returns the path of the human-readable log file.
+        Returns the path of the human-readable .txt report.
         """
         log_dir.mkdir(parents=True, exist_ok=True)
         report = self.build_daily_report()
         day = datetime.fromtimestamp(self.started_at).strftime("%Y-%m-%d")
         base = log_dir / f"nids-{day}"
         # avoid clobbering if a report for this date already exists (manual runs)
-        if base.with_suffix(".log").exists():
+        if base.with_suffix(".txt").exists():
             base = log_dir / f"nids-{day}_{datetime.now().strftime('%H%M%S')}"
 
         base.with_suffix(".json").write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
-        log_path = base.with_suffix(".log")
-        log_path.write_text(_format_report(report), encoding="utf-8")
+        txt_path = base.with_suffix(".txt")
+        txt_path.write_text(_format_report(report), encoding="utf-8")
         self.reset()
-        return log_path
+        return txt_path
 
     def query_alerts(self, limit: int = 200, severity: str | None = None, since: float | None = None) -> list[dict]:
         sql = "SELECT * FROM alerts"

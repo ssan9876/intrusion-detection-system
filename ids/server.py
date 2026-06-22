@@ -133,14 +133,16 @@ def create_app(config: Config) -> FastAPI:
 
     @app.get("/api/logs")
     async def list_logs() -> dict:
-        """List archived daily logs and when the next rollover fires."""
+        """List archived daily logs (newest first) and the next rollover time."""
         logs = []
-        for p in sorted(config.log_dir.glob("nids-*.log"), reverse=True):
+        for p in sorted(config.log_dir.glob("nids-*.txt"), reverse=True):
             st = p.stat()
             logs.append({
                 "name": p.name,
                 "size": st.st_size,
                 "modified": datetime.fromtimestamp(st.st_mtime).isoformat(timespec="seconds"),
+                # the matching structured report, if present
+                "json": p.with_suffix(".json").name if p.with_suffix(".json").is_file() else None,
             })
         nxt = datetime.now() + timedelta(seconds=_seconds_until_hour(config.rollover_hour))
         return {
@@ -150,15 +152,18 @@ def create_app(config: Config) -> FastAPI:
             "logs": logs,
         }
 
-    @app.get("/api/logs/{name}", response_class=PlainTextResponse)
-    async def get_log(name: str) -> str:
-        # prevent path traversal; only serve files from the log dir
-        if "/" in name or "\\" in name or ".." in name:
+    @app.get("/api/logs/{name}")
+    async def get_log(name: str, download: bool = False):
+        """Return an archived report. ?download=1 forces a file download."""
+        # prevent path traversal; only serve report files from the log dir
+        if "/" in name or "\\" in name or ".." in name or not name.startswith("nids-"):
             raise HTTPException(status_code=400, detail="invalid name")
         path = config.log_dir / name
         if not path.is_file():
             raise HTTPException(status_code=404, detail="not found")
-        return path.read_text(encoding="utf-8")
+        media = "application/json" if path.suffix == ".json" else "text/plain"
+        headers = {"Content-Disposition": f'attachment; filename="{name}"'} if download else {}
+        return PlainTextResponse(path.read_text(encoding="utf-8"), media_type=media, headers=headers)
 
     @app.post("/api/rollover")
     async def rollover() -> dict:

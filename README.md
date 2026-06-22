@@ -102,12 +102,14 @@ Each day at `IDS_ROLLOVER_HOUR` (local time, default **23:00**) the system write
 the day's activity to `IDS_LOG_DIR` and resets the live stats so the dashboard
 starts fresh:
 
-- `nids-YYYY-MM-DD.log` — human-readable summary (totals, protocols, severity
+- `nids-YYYY-MM-DD.txt` — human-readable summary (totals, protocols, severity
   breakdown, top talkers, and every alert of the day)
 - `nids-YYYY-MM-DD.json` — the same data as structured JSON
 
-The dashboard's **Daily Reports** card lists archives (downloadable) and shows
-the next rollover time. Endpoints: `GET /api/logs`, `GET /api/logs/{name}`, and
+The dashboard's **Daily Reports** card lists archives newest-first. Click a name
+(or **View**) to read the report in an in-page viewer, **Download** to save the
+`.txt`, or **.json** for the structured file. Endpoints: `GET /api/logs`,
+`GET /api/logs/{name}` (add `?download=1` to force a download), and
 `POST /api/rollover` (trigger immediately). In the recommended deployment
 `IDS_LOG_DIR` lives on TrueNAS, so reports are retained on the NAS.
 
