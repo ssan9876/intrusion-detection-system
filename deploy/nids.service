@@ -1,0 +1,32 @@
+[Unit]
+Description=Signature-based Network IDS
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Capture requires raw-socket capability; granted via AmbientCapabilities so we
+# don't run the whole thing as unrestricted root.
+User=nids
+Group=nids
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+NoNewPrivileges=true
+WorkingDirectory=/opt/nids
+# scapy probes an XDG config dir at import; the service user has no usable
+# $HOME and ProtectHome blocks /home, so point HOME/XDG at the writable data dir.
+Environment=HOME=/opt/nids/data
+Environment=XDG_CONFIG_HOME=/opt/nids/data/.config
+Environment=XDG_CACHE_HOME=/opt/nids/data/.cache
+EnvironmentFile=/etc/nids/nids.env
+ExecStart=/opt/nids/venv/bin/python -m ids
+Restart=on-failure
+RestartSec=3
+
+# Hardening
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

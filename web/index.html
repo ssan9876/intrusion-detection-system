@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Signature NIDS — Network Monitor</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◈</span>
+      <div>
+        <h1>Signature NIDS</h1>
+        <span class="subtitle">Network Intrusion Detection</span>
+      </div>
+    </div>
+    <div class="status-cluster">
+      <div class="pill" id="mode-pill"><span class="dot"></span><span id="mode-text">connecting…</span></div>
+      <div class="pill"><span id="rules-count">0</span>&nbsp;rules</div>
+      <div class="pill"><span id="iface-text">—</span></div>
+      <div class="pill" id="conn-pill"><span class="dot dot-amber"></span>WS</div>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card stat"><div class="stat-label">Packets</div><div class="stat-value" id="stat-packets">0</div><div class="stat-sub" id="stat-pps">0 pps</div></section>
+    <section class="card stat"><div class="stat-label">Traffic</div><div class="stat-value" id="stat-bytes">0 B</div><div class="stat-sub" id="stat-bps">0 bps</div></section>
+    <section class="card stat"><div class="stat-label">Active Flows</div><div class="stat-value" id="stat-flows">0</div><div class="stat-sub">src→dst pairs</div></section>
+    <section class="card stat alert-stat"><div class="stat-label">Alerts</div><div class="stat-value" id="stat-alerts">0</div><div class="stat-sub" id="stat-uptime">up 0s</div></section>
+
+    <section class="card span-2 chart-card">
+      <div class="card-head"><h2>Throughput — last 60s</h2><span class="muted" id="chart-peak"></span></div>
+      <canvas id="bw-chart" height="160"></canvas>
+    </section>
+
+    <section class="card severity-card">
+      <div class="card-head"><h2>Severity</h2></div>
+      <div id="severity-bars"></div>
+    </section>
+
+    <section class="card protocol-card">
+      <div class="card-head"><h2>Protocols</h2></div>
+      <canvas id="proto-chart" height="160"></canvas>
+      <div id="proto-legend" class="legend"></div>
+    </section>
+
+    <section class="card span-2 alerts-card">
+      <div class="card-head">
+        <h2>Security Alerts</h2>
+        <div class="filters" id="sev-filter">
+          <button class="active" data-sev="">All</button>
+          <button data-sev="critical">Critical</button>
+          <button data-sev="high">High</button>
+          <button data-sev="medium">Medium</button>
+          <button data-sev="low">Low</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="alerts-table">
+          <thead><tr><th>Time</th><th>Sev</th><th>Signature</th><th>Source</th><th>Destination</th><th>Detail</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card talkers-card">
+      <div class="card-head"><h2>Top Talkers</h2></div>
+      <div id="talkers-list" class="bars"></div>
+    </section>
+
+    <section class="card logs-card">
+      <div class="card-head">
+        <h2>Daily Reports</h2>
+        <button id="rollover-btn" class="mini-btn" title="Archive today and reset stats now">Roll over now</button>
+      </div>
+      <div class="muted" id="rollover-info" style="margin-bottom:8px">—</div>
+      <div id="logs-list" class="logs-list"></div>
+    </section>
+
+    <section class="card span-3 live-card">
+      <div class="card-head"><h2>Live Traffic</h2><span class="muted">most recent packets</span></div>
+      <div class="table-wrap short">
+        <table id="packets-table">
+          <thead><tr><th>Time</th><th>Proto</th><th>Source</th><th>Destination</th><th>Len</th><th>Info</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

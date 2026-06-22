@@ -1,0 +1,125 @@
+{
+  "rules": [
+    {
+      "id": "MAL-EICAR",
+      "name": "EICAR antivirus test file signature",
+      "severity": "high",
+      "category": "malware",
+      "protocol": "any",
+      "content": "EICAR-STANDARD-ANTIVIRUS-TEST-FILE",
+      "references": ["https://www.eicar.org/download-anti-malware-testfile/"]
+    },
+    {
+      "id": "MAL-PE-DOWNLOAD",
+      "name": "Windows PE executable transferred over HTTP",
+      "severity": "medium",
+      "category": "malware",
+      "protocol": "tcp",
+      "src_port": 80,
+      "content_hex": "4d5a9000",
+      "references": ["https://en.wikipedia.org/wiki/DOS_MZ_executable"]
+    },
+    {
+      "id": "MAL-UA-EMPTY-POWERSHELL",
+      "name": "Suspicious PowerShell / WebClient User-Agent",
+      "severity": "high",
+      "category": "malware",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "User-Agent:[^\\r\\n]*(WindowsPowerShell|Microsoft BITS|WebClient)",
+      "nocase": true,
+      "references": ["https://attack.mitre.org/techniques/T1071/001/"]
+    },
+    {
+      "id": "EXP-SHELLCODE-NOP",
+      "name": "x86 NOP sled (possible shellcode/exploit)",
+      "severity": "high",
+      "category": "exploit",
+      "protocol": "tcp",
+      "content_hex": "9090909090909090",
+      "references": ["https://attack.mitre.org/techniques/T1203/"]
+    },
+    {
+      "id": "WEB-SQLI-UNION",
+      "name": "SQL injection attempt (UNION SELECT)",
+      "severity": "high",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "union\\s+select",
+      "nocase": true,
+      "references": ["https://owasp.org/www-community/attacks/SQL_Injection"]
+    },
+    {
+      "id": "WEB-TRAVERSAL",
+      "name": "Directory traversal attempt (../)",
+      "severity": "medium",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "(\\.\\./){2,}",
+      "references": ["https://owasp.org/www-community/attacks/Path_Traversal"]
+    },
+    {
+      "id": "WEB-WEBSHELL-CMD",
+      "name": "Web shell command execution pattern",
+      "severity": "critical",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "(cmd|c100|r57|b374k|wso)\\.php\\?",
+      "nocase": true,
+      "references": ["https://attack.mitre.org/techniques/T1505/003/"]
+    },
+    {
+      "id": "C2-DNS-DGA-LONG",
+      "name": "Unusually long DNS query (possible DGA / tunneling)",
+      "severity": "medium",
+      "category": "c2",
+      "protocol": "udp",
+      "dst_port": 53,
+      "regex": "[a-z0-9]{40,}",
+      "nocase": true,
+      "references": ["https://attack.mitre.org/techniques/T1568/002/"]
+    },
+    {
+      "id": "C2-IRC-NICK",
+      "name": "IRC NICK command (legacy botnet C2 channel)",
+      "severity": "low",
+      "category": "c2",
+      "protocol": "tcp",
+      "regex": "^(NICK|USER|JOIN)\\s",
+      "references": ["https://attack.mitre.org/techniques/T1071/"]
+    },
+    {
+      "id": "RECON-NMAP-UA",
+      "name": "Nmap scripting engine User-Agent",
+      "severity": "low",
+      "category": "recon",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "content": "Nmap Scripting Engine",
+      "references": ["https://nmap.org/book/nse.html"]
+    },
+    {
+      "id": "MAL-METASPLOIT-DEFAULT",
+      "name": "Metasploit Meterpreter default certificate/string",
+      "severity": "critical",
+      "category": "malware",
+      "protocol": "tcp",
+      "content": "metasploit",
+      "nocase": true,
+      "references": ["https://attack.mitre.org/software/S0002/"]
+    },
+    {
+      "id": "POL-CLEARTEXT-FTP-LOGIN",
+      "name": "Cleartext FTP credentials observed",
+      "severity": "low",
+      "category": "policy",
+      "protocol": "tcp",
+      "dst_port": 21,
+      "regex": "^(USER|PASS)\\s",
+      "references": ["https://attack.mitre.org/techniques/T1040/"]
+    }
+  ]
+}
