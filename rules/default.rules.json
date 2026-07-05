@@ -120,6 +120,189 @@
       "dst_port": 21,
       "regex": "^(USER|PASS)\\s",
       "references": ["https://attack.mitre.org/techniques/T1040/"]
+    },
+    {
+      "id": "EXP-LOG4SHELL-JNDI",
+      "name": "Log4Shell JNDI lookup injection (CVE-2021-44228)",
+      "severity": "critical",
+      "category": "exploit",
+      "protocol": "tcp",
+      "regex": "\\$\\{jndi:(ldap|ldaps|rmi|dns|iiop|http)",
+      "nocase": true,
+      "references": ["https://nvd.nist.gov/vuln/detail/CVE-2021-44228"]
+    },
+    {
+      "id": "EXP-SHELLSHOCK",
+      "name": "Shellshock bash function injection (CVE-2014-6271)",
+      "severity": "critical",
+      "category": "exploit",
+      "protocol": "tcp",
+      "regex": "\\(\\)\\s*\\{\\s*:;?\\s*\\}\\s*;",
+      "references": ["https://nvd.nist.gov/vuln/detail/CVE-2014-6271"]
+    },
+    {
+      "id": "EXP-HEARTBLEED-REQ",
+      "name": "TLS heartbeat request, Heartbleed-sized (CVE-2014-0160)",
+      "severity": "high",
+      "category": "exploit",
+      "protocol": "tcp",
+      "dst_port": 443,
+      "content_hex": "180302000301",
+      "references": ["https://nvd.nist.gov/vuln/detail/CVE-2014-0160"]
+    },
+    {
+      "id": "WEB-XSS-SCRIPT-TAG",
+      "name": "Cross-site scripting attempt (script tag in request)",
+      "severity": "medium",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "<script[^>]*>",
+      "nocase": true,
+      "references": ["https://owasp.org/www-community/attacks/xss/"]
+    },
+    {
+      "id": "WEB-SQLI-BOOLEAN",
+      "name": "SQL injection attempt (boolean tautology)",
+      "severity": "high",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "('|%27)\\s*(or|and)\\s+('|%27)?1('|%27)?\\s*=\\s*('|%27)?1",
+      "nocase": true,
+      "references": ["https://owasp.org/www-community/attacks/SQL_Injection"]
+    },
+    {
+      "id": "WEB-SQLI-TIME",
+      "name": "SQL injection attempt (time-based blind)",
+      "severity": "high",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "(sleep\\(\\d+\\)|benchmark\\(|waitfor\\s+delay|pg_sleep\\()",
+      "nocase": true,
+      "references": ["https://owasp.org/www-community/attacks/Blind_SQL_Injection"]
+    },
+    {
+      "id": "WEB-CMD-INJECTION",
+      "name": "OS command injection in HTTP request",
+      "severity": "high",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "[;&|]\\s*(wget|curl|nc|ncat|bash|sh|powershell)\\s",
+      "nocase": true,
+      "references": ["https://owasp.org/www-community/attacks/Command_Injection"]
+    },
+    {
+      "id": "WEB-PHP-EVAL-OBFUSCATED",
+      "name": "Obfuscated PHP code injection (eval of encoded payload)",
+      "severity": "critical",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "regex": "eval\\s*\\(\\s*(base64_decode|gzinflate|gzuncompress|str_rot13)",
+      "nocase": true,
+      "references": ["https://attack.mitre.org/techniques/T1027/"]
+    },
+    {
+      "id": "WEB-SENSITIVE-FILE",
+      "name": "Sensitive file access attempt (/etc/shadow, wp-config…)",
+      "severity": "high",
+      "category": "web-attack",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "(/etc/shadow|/etc/passwd%00|wp-config\\.php|\\.git/config|id_rsa)",
+      "nocase": true,
+      "references": ["https://owasp.org/www-community/attacks/Path_Traversal"]
+    },
+    {
+      "id": "MAL-REVERSE-SHELL",
+      "name": "Interactive reverse shell one-liner",
+      "severity": "critical",
+      "category": "malware",
+      "protocol": "tcp",
+      "regex": "(/bin/(ba)?sh\\s+-i|bash\\s+-i\\s*>&|/dev/tcp/\\d)",
+      "nocase": true,
+      "references": ["https://attack.mitre.org/techniques/T1059/004/"]
+    },
+    {
+      "id": "MAL-GH0ST-RAT",
+      "name": "Gh0st RAT C2 protocol magic",
+      "severity": "critical",
+      "category": "malware",
+      "protocol": "tcp",
+      "content": "Gh0st",
+      "references": ["https://attack.mitre.org/software/S0032/"]
+    },
+    {
+      "id": "MAL-MIRAI-TELNET-CREDS",
+      "name": "Mirai botnet default credentials on telnet",
+      "severity": "high",
+      "category": "malware",
+      "protocol": "tcp",
+      "dst_port": 23,
+      "regex": "(xc3511|vizxv|juantech|7ujMko0)",
+      "references": ["https://attack.mitre.org/software/S0679/"]
+    },
+    {
+      "id": "C2-MINING-STRATUM",
+      "name": "Cryptomining Stratum protocol (mining.subscribe)",
+      "severity": "medium",
+      "category": "c2",
+      "protocol": "tcp",
+      "content": "mining.subscribe",
+      "references": ["https://attack.mitre.org/techniques/T1496/"]
+    },
+    {
+      "id": "C2-ICMP-PTUNNEL",
+      "name": "Ptunnel ICMP tunnel magic (covert channel)",
+      "severity": "medium",
+      "category": "c2",
+      "protocol": "icmp",
+      "content_hex": "d5200880",
+      "references": ["https://attack.mitre.org/techniques/T1095/"]
+    },
+    {
+      "id": "RECON-SQLMAP-UA",
+      "name": "sqlmap scanner User-Agent",
+      "severity": "medium",
+      "category": "recon",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "content": "sqlmap",
+      "nocase": true,
+      "references": ["https://sqlmap.org/"]
+    },
+    {
+      "id": "RECON-NIKTO-UA",
+      "name": "Nikto web scanner User-Agent",
+      "severity": "low",
+      "category": "recon",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "content": "Nikto",
+      "references": ["https://cirt.net/Nikto2"]
+    },
+    {
+      "id": "RECON-DIRBUSTER-UA",
+      "name": "Directory brute-force tool User-Agent",
+      "severity": "low",
+      "category": "recon",
+      "protocol": "tcp",
+      "dst_port": 80,
+      "regex": "User-Agent:[^\\r\\n]*(gobuster|dirbuster|feroxbuster|wfuzz|dirb)",
+      "nocase": true,
+      "references": ["https://attack.mitre.org/techniques/T1595/003/"]
+    },
+    {
+      "id": "POL-SMBV1-NEGOTIATE",
+      "name": "SMBv1 protocol negotiation (deprecated, wormable)",
+      "severity": "low",
+      "category": "policy",
+      "protocol": "tcp",
+      "dst_port": 445,
+      "content_hex": "ff534d4272",
+      "references": ["https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3"]
     }
   ]
 }
