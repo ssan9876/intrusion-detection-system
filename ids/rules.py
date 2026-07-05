@@ -35,6 +35,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 SEVERITIES = {"low", "medium", "high", "critical"}
+PROTOCOLS = {"tcp", "udp", "icmp", "ip", "any"}
+
+
+class RuleError(ValueError):
+    """A rule in the signature file is malformed."""
 
 
 @dataclass
@@ -58,6 +63,9 @@ class Rule:
 
     def __post_init__(self) -> None:
         self.protocol = (self.protocol or "any").lower()
+        if self.protocol not in PROTOCOLS:
+            raise RuleError(f"rule {self.id!r}: unknown protocol {self.protocol!r} "
+                            f"(expected one of {sorted(PROTOCOLS)})")
         if self.severity not in SEVERITIES:
             self.severity = "medium"
 
@@ -65,11 +73,17 @@ class Rule:
             text = self.content
             self._content_bytes = (text.lower() if self.nocase else text).encode("utf-8", "ignore")
         elif self.content_hex is not None:
-            self._content_bytes = bytes.fromhex(self.content_hex.replace(" ", ""))
+            try:
+                self._content_bytes = bytes.fromhex(self.content_hex.replace(" ", ""))
+            except ValueError as exc:
+                raise RuleError(f"rule {self.id!r}: invalid content_hex: {exc}") from exc
 
         if self.regex is not None:
             flags = re.IGNORECASE if self.nocase else 0
-            self._regex = re.compile(self.regex, flags)
+            try:
+                self._regex = re.compile(self.regex, flags)
+            except re.error as exc:
+                raise RuleError(f"rule {self.id!r}: invalid regex: {exc}") from exc
 
     def matches_payload(self, payload: bytes) -> bool:
         """Return True if this rule's content/hex/regex matches the payload."""
@@ -100,9 +114,15 @@ class RuleSet:
         # Accept either a bare list or {"rules": [...]}
         items = raw["rules"] if isinstance(raw, dict) else raw
         rules: list[Rule] = []
+        seen_ids: set[str] = set()
         known = {f for f in Rule.__dataclass_fields__ if not f.startswith("_")}
-        for item in items:
+        for i, item in enumerate(items):
             data = {k: v for k, v in item.items() if k in known}
+            if not data.get("id") or not data.get("name"):
+                raise RuleError(f"rule #{i + 1} in {path.name}: 'id' and 'name' are required")
+            if data["id"] in seen_ids:
+                raise RuleError(f"duplicate rule id {data['id']!r} in {path.name}")
+            seen_ids.add(data["id"])
             rules.append(Rule(**data))
         return cls(rules=rules, source=path)
 

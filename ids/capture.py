@@ -14,6 +14,7 @@ import time
 from typing import Callable
 
 from .config import Config
+from .detectors import PortScanDetector
 from .engine import Engine
 from .store import Alert, PacketRecord, Store
 
@@ -23,7 +24,10 @@ try:  # pragma: no cover - environment dependent
     from scapy.all import IP, TCP, UDP, ICMP, Raw, AsyncSniffer  # type: ignore
 
     SCAPY_AVAILABLE = True
-except Exception:  # pragma: no cover
+except BaseException:  # pragma: no cover
+    # BaseException, not Exception: a broken native dependency (e.g. a pyo3
+    # panic inside cryptography) raises a BaseException subclass, and the
+    # demo-mode fallback must survive that too.
     SCAPY_AVAILABLE = False
 
 
@@ -45,6 +49,9 @@ class Sensor:
         self._demo_thread: threading.Thread | None = None
         self._stop = threading.Event()
         self.mode = "stopped"
+        self._portscan = PortScanDetector(
+            threshold=config.portscan_threshold, window=config.portscan_window
+        )
 
     # ----- lifecycle -------------------------------------------------------
     def start(self) -> None:
@@ -111,8 +118,14 @@ class Sensor:
                            dport=dport, length=length, summary=summary)
         self.store.record_packet(rec)
 
-        for rule in self.engine.evaluate(proto, sport, dport, payload):
-            detail = payload[:120].decode("latin-1", "ignore") if payload else summary
+        hits = list(self.engine.evaluate(proto, sport, dport, payload))
+        scan_hit = self._portscan.observe(ts, src, dst, proto, dport)
+        if scan_hit is not None:
+            hits.append(scan_hit)
+        for rule in hits:
+            detail = getattr(rule, "detail", "") or (
+                payload[:120].decode("latin-1", "ignore") if payload else summary
+            )
             alert = Alert(
                 ts=ts, rule_id=rule.id, rule_name=rule.name, severity=rule.severity,
                 category=rule.category, src=src, dst=dst, proto=proto, sport=sport,
@@ -166,6 +179,18 @@ class Sensor:
                     dport=dport, length=len(payload) + random.randint(40, 600),
                     payload=payload, summary=f"{proto.upper()} {src}:{sport} -> {dst}:{dport}",
                 )
+            # rare port scan (trips the stateful PortScanDetector)
+            if random.random() < 0.02:
+                scanner = random.choice(externals)
+                target = random.choice(hosts)
+                now = time.time()
+                for port in random.sample(range(20, 1100), 20):
+                    self._ingest(
+                        ts=now, src=scanner, dst=target, proto="tcp",
+                        sport=random.randint(40000, 65535), dport=port,
+                        length=60, payload=b"",
+                        summary=f"TCP {scanner} -> {target}:{port} [SYN]",
+                    )
             # occasional attack
             if random.random() < 0.35:
                 proto, dport, payload = random.choice(attacks)

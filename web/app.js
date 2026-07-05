@@ -7,8 +7,16 @@
   const SEV_ORDER = ["critical", "high", "medium", "low"];
 
   let severityFilter = "";
+  let alertSearch = "";
   let seenAlertKeys = new Set();
-  let lastTotals = null;
+  let packetsPaused = false;
+
+  // Every dynamic value goes through this before touching innerHTML.
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+    ));
+  }
 
   function fmtBytes(n) {
     if (n < 1024) return n + " B";
@@ -24,7 +32,30 @@
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
     return (h ? h + "h " : "") + (m ? m + "m " : "") + sec + "s";
   }
-  function ep(host, port) { return port ? `${host}:${port}` : host; }
+  function ep(host, port) { return escapeHtml(port ? `${host}:${port}` : host); }
+
+  // Size a canvas for the device pixel ratio so charts are crisp on hi-DPI.
+  function prepCanvas(c) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = c.clientWidth, h = c.getAttribute("height") | 0 || c.clientHeight;
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.height = h + "px";
+    const ctx = c.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    return [ctx, w, h];
+  }
+
+  // ---- toasts ----
+  function toast(sev, title, body) {
+    const box = $("toasts");
+    const el = document.createElement("div");
+    el.className = `toast ${escapeHtml(sev)}`;
+    el.innerHTML = `<div class="toast-title"><span class="badge ${escapeHtml(sev)}">${escapeHtml(sev)}</span> ${escapeHtml(title)}</div><div class="toast-body">${escapeHtml(body)}</div>`;
+    box.appendChild(el);
+    setTimeout(() => { el.classList.add("gone"); setTimeout(() => el.remove(), 400); }, 6000);
+    while (box.children.length > 4) box.firstChild.remove();
+  }
 
   // ---- status ----
   async function loadStatus() {
@@ -40,9 +71,7 @@
 
   // ---- charts ----
   function drawBandwidth(series) {
-    const c = $("bw-chart"); const ctx = c.getContext("2d");
-    const w = c.width = c.clientWidth, h = c.height;
-    ctx.clearRect(0, 0, w, h);
+    const [ctx, w, h] = prepCanvas($("bw-chart"));
     if (!series || !series.length) return;
     const max = Math.max(1, ...series.map((p) => p.bps));
     $("chart-peak").textContent = "peak " + fmtBytes(max) + "/s";
@@ -62,9 +91,7 @@
   }
 
   function drawProtocols(counts) {
-    const c = $("proto-chart"); const ctx = c.getContext("2d");
-    const w = c.width = c.clientWidth, h = c.height;
-    ctx.clearRect(0, 0, w, h);
+    const [ctx, w, h] = prepCanvas($("proto-chart"));
     const entries = Object.entries(counts || {}).sort((a, b) => b[1] - a[1]);
     const total = entries.reduce((s, [, v]) => s + v, 0);
     const cx = w / 2, cy = h / 2, r = Math.min(w, h) / 2 - 6, inner = r * 0.6;
@@ -78,7 +105,7 @@
       ctx.fillStyle = col; ctx.fill();
       a0 = a1;
       const item = document.createElement("div"); item.className = "item";
-      item.innerHTML = `<span class="swatch" style="background:${col}"></span>${proto.toUpperCase()} ${(frac * 100).toFixed(0)}%`;
+      item.innerHTML = `<span class="swatch" style="background:${col}"></span>${escapeHtml(proto.toUpperCase())} ${(frac * 100).toFixed(0)}%`;
       legend.appendChild(item);
     }
     ctx.beginPath(); ctx.arc(cx, cy, inner, 0, Math.PI * 2); ctx.fillStyle = "#0f1520"; ctx.fill();
@@ -99,32 +126,36 @@
     const box = $("talkers-list");
     const max = Math.max(1, ...talkers.map((t) => t.bytes));
     box.innerHTML = talkers.map((t) =>
-      `<div class="bar-row"><div class="bar-top"><span>${t.host}</span><span class="val">${fmtBytes(t.bytes)}</span></div><div class="track"><span class="fill" style="width:${(t.bytes / max) * 100}%"></span></div></div>`
+      `<div class="bar-row"><div class="bar-top"><span>${escapeHtml(t.host)}</span><span class="val">${fmtBytes(t.bytes)}</span></div><div class="track"><span class="fill" style="width:${(t.bytes / max) * 100}%"></span></div></div>`
     ).join("") || `<div class="muted">no traffic yet</div>`;
   }
 
   function renderPackets(packets) {
+    if (packetsPaused) return;
     const tb = $("packets-table").querySelector("tbody");
     tb.innerHTML = packets.slice().reverse().map((p) =>
-      `<tr><td>${fmtTime(p.ts)}</td><td class="proto-tag">${p.proto.toUpperCase()}</td><td>${ep(p.src, p.sport)}</td><td>${ep(p.dst, p.dport)}</td><td>${p.length}</td><td class="detail">${escapeHtml(p.summary || "")}</td></tr>`
+      `<tr><td>${fmtTime(p.ts)}</td><td class="proto-tag">${escapeHtml(p.proto.toUpperCase())}</td><td>${ep(p.src, p.sport)}</td><td>${ep(p.dst, p.dport)}</td><td>${p.length}</td><td class="detail">${escapeHtml(p.summary || "")}</td></tr>`
     ).join("");
   }
 
   function alertKey(a) { return `${a.ts}|${a.rule_id}|${a.src}|${a.dst}`; }
 
-  function renderAlerts(alerts) {
-    const tb = $("alerts-table").querySelector("tbody");
-    const filtered = alerts.filter((a) => !severityFilter || a.severity === severityFilter);
-    tb.innerHTML = filtered.slice().reverse().map((a) => {
-      const isNew = !seenAlertKeys.has(alertKey(a));
-      return `<tr class="${isNew ? "new-alert" : ""}"><td>${fmtTime(a.ts)}</td><td><span class="badge ${a.severity}">${a.severity}</span></td><td title="${escapeHtml(a.rule_id)}">${escapeHtml(a.rule_name)}</td><td>${ep(a.src, a.sport)}</td><td>${ep(a.dst, a.dport)}</td><td class="detail" title="${escapeHtml(a.detail || "")}">${escapeHtml(a.detail || "")}</td></tr>`;
-    }).join("") || `<tr><td colspan="6" class="muted" style="text-align:center;padding:20px">no alerts${severityFilter ? " at this severity" : ""}</td></tr>`;
-    alerts.forEach((a) => seenAlertKeys.add(alertKey(a)));
-    if (seenAlertKeys.size > 5000) seenAlertKeys = new Set(alerts.map(alertKey));
+  function matchesSearch(a, q) {
+    if (!q) return true;
+    return [a.rule_id, a.rule_name, a.category, a.src, a.dst, a.detail]
+      .some((f) => String(f || "").toLowerCase().includes(q));
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function renderAlerts(alerts) {
+    const tb = $("alerts-table").querySelector("tbody");
+    const q = alertSearch.trim().toLowerCase();
+    const filtered = alerts.filter((a) => (!severityFilter || a.severity === severityFilter) && matchesSearch(a, q));
+    tb.innerHTML = filtered.slice().reverse().map((a) => {
+      const isNew = !seenAlertKeys.has(alertKey(a));
+      return `<tr class="${isNew ? "new-alert" : ""}"><td>${fmtTime(a.ts)}</td><td><span class="badge ${escapeHtml(a.severity)}">${escapeHtml(a.severity)}</span></td><td title="${escapeHtml(a.rule_id)}">${escapeHtml(a.rule_name)}</td><td>${ep(a.src, a.sport)}</td><td>${ep(a.dst, a.dport)}</td><td class="detail" title="${escapeHtml(a.detail || "")}">${escapeHtml(a.detail || "")}</td></tr>`;
+    }).join("") || `<tr><td colspan="6" class="muted" style="text-align:center;padding:20px">no alerts${severityFilter || q ? " match the current filter" : ""}</td></tr>`;
+    alerts.forEach((a) => seenAlertKeys.add(alertKey(a)));
+    if (seenAlertKeys.size > 5000) seenAlertKeys = new Set(alerts.map(alertKey));
   }
 
   // ---- snapshot apply ----
@@ -193,7 +224,54 @@
   });
   $("modal-close").addEventListener("click", closeLog);
   $("log-modal").addEventListener("click", (e) => { if (e.target.id === "log-modal") closeLog(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLog(); });
+
+  // ---- rules browser ----
+  async function openRules() {
+    $("rules-modal").hidden = false;
+    const box = $("rules-body");
+    box.innerHTML = `<div class="muted">loading…</div>`;
+    try {
+      const rules = await (await fetch("/api/rules")).json();
+      box.innerHTML = rules.map((r) => {
+        const match = r.content ? `content: ${r.content}` : r.content_hex ? `hex: ${r.content_hex}` : r.regex ? `regex: ${r.regex}` : "header match";
+        const ports = [r.src_port != null ? `src:${r.src_port}` : "", r.dst_port != null ? `dst:${r.dst_port}` : ""].filter(Boolean).join(" ");
+        const refs = (r.references || []).map((u) =>
+          `<a href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer">ref</a>`).join(" ");
+        return `<div class="rule-item">
+          <div class="rule-top">
+            <span class="badge ${escapeHtml(r.severity)}">${escapeHtml(r.severity)}</span>
+            <span class="rule-id">${escapeHtml(r.id)}</span>
+            <span class="rule-proto">${escapeHtml(r.protocol.toUpperCase())}${ports ? " · " + escapeHtml(ports) : ""}</span>
+            ${refs}
+          </div>
+          <div class="rule-name">${escapeHtml(r.name)}</div>
+          <div class="rule-match">${escapeHtml(match)}</div>
+        </div>`;
+      }).join("") || `<div class="muted">no rules loaded</div>`;
+    } catch (e) { box.innerHTML = `<div class="muted">failed to load rules</div>`; }
+  }
+  function closeRules() { $("rules-modal").hidden = true; }
+
+  $("rules-pill").addEventListener("click", openRules);
+  $("rules-close").addEventListener("click", closeRules);
+  $("rules-modal").addEventListener("click", (e) => { if (e.target.id === "rules-modal") closeRules(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeLog(); closeRules(); } });
+
+  $("rules-reload").addEventListener("click", async () => {
+    const btn = $("rules-reload");
+    btn.disabled = true; btn.textContent = "reloading…";
+    try {
+      const res = await fetch("/api/rules/reload", { method: "POST" });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.detail || "reload failed");
+      btn.textContent = `loaded ${d.rules_loaded} ✓`;
+      loadStatus(); openRules();
+    } catch (e) {
+      btn.textContent = "failed";
+      toast("high", "Rule reload failed", e.message || String(e));
+    }
+    setTimeout(() => { btn.disabled = false; btn.textContent = "Reload from disk"; }, 2500);
+  });
 
   $("rollover-btn").addEventListener("click", async () => {
     if (!confirm("Archive today's activity to a log file and reset live stats now?")) return;
@@ -218,17 +296,35 @@
     ws.onmessage = (ev) => {
       const msg = JSON.parse(ev.data);
       if (msg.type === "snapshot") applySnapshot(msg.data);
-      else if (msg.type === "alert") { /* snapshot will refresh within 1s; flash handled there */ }
+      else if (msg.type === "alert") {
+        const a = msg.alert;
+        if (a.severity === "critical" || a.severity === "high") {
+          toast(a.severity, a.rule_name, `${a.src} → ${a.dst}${a.dport ? ":" + a.dport : ""}`);
+        }
+      }
       else if (msg.type === "rollover") { seenAlertKeys = new Set(); loadLogs(); }
+      else if (msg.type === "rules") { $("rules-count").textContent = msg.count; }
     };
   }
 
-  // ---- filter buttons ----
+  // ---- alert filters ----
   $("sev-filter").addEventListener("click", (e) => {
     const btn = e.target.closest("button"); if (!btn) return;
     severityFilter = btn.dataset.sev;
     $("sev-filter").querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn));
     renderAlerts(latestAlerts);
+  });
+  $("alert-search").addEventListener("input", (e) => {
+    alertSearch = e.target.value;
+    renderAlerts(latestAlerts);
+  });
+
+  // ---- live traffic pause ----
+  $("pause-btn").addEventListener("click", () => {
+    packetsPaused = !packetsPaused;
+    const btn = $("pause-btn");
+    btn.textContent = packetsPaused ? "▶ Resume" : "⏸ Pause";
+    btn.classList.toggle("active", packetsPaused);
   });
 
   loadStatus();

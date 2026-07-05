@@ -12,10 +12,16 @@ from .rules import Rule, RuleSet
 
 class Engine:
     def __init__(self, ruleset: RuleSet):
-        self.ruleset = ruleset
-        self._by_proto: dict[str, list[Rule]] = defaultdict(list)
+        self.reload(ruleset)
+
+    def reload(self, ruleset: RuleSet) -> None:
+        """Swap in a new ruleset (used by POST /api/rules/reload)."""
+        by_proto: dict[str, list[Rule]] = defaultdict(list)
         for rule in ruleset.rules:
-            self._by_proto[rule.protocol].append(rule)
+            by_proto[rule.protocol].append(rule)
+        # assign both atomically-enough: evaluate() only reads these two refs
+        self.ruleset = ruleset
+        self._by_proto = by_proto
 
     @property
     def rule_count(self) -> int:

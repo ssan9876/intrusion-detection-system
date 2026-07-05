@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Signature NIDS — Network Monitor</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 4 7v8c0 8 5.3 13.4 12 15 6.7-1.6 12-7 12-15V7L16 2z' fill='%2338bdf8'/%3E%3Cpath d='M10 16.5l4 4 8-8' stroke='%230b0f17' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -17,7 +18,7 @@
     </div>
     <div class="status-cluster">
       <div class="pill" id="mode-pill"><span class="dot"></span><span id="mode-text">connecting…</span></div>
-      <div class="pill"><span id="rules-count">0</span>&nbsp;rules</div>
+      <div class="pill pill-btn" id="rules-pill" title="Browse loaded signatures"><span id="rules-count">0</span>&nbsp;rules</div>
       <div class="pill"><span id="iface-text">—</span></div>
       <div class="pill" id="conn-pill"><span class="dot dot-amber"></span>WS</div>
     </div>
@@ -48,12 +49,16 @@
     <section class="card span-2 alerts-card">
       <div class="card-head">
         <h2>Security Alerts</h2>
-        <div class="filters" id="sev-filter">
-          <button class="active" data-sev="">All</button>
-          <button data-sev="critical">Critical</button>
-          <button data-sev="high">High</button>
-          <button data-sev="medium">Medium</button>
-          <button data-sev="low">Low</button>
+        <div class="alert-tools">
+          <input id="alert-search" type="search" placeholder="filter: rule, host, detail…" autocomplete="off" />
+          <div class="filters" id="sev-filter">
+            <button class="active" data-sev="">All</button>
+            <button data-sev="critical">Critical</button>
+            <button data-sev="high">High</button>
+            <button data-sev="medium">Medium</button>
+            <button data-sev="low">Low</button>
+          </div>
+          <a class="mini-btn" href="/api/alerts.csv" title="Export alert history as CSV">⬇ CSV</a>
         </div>
       </div>
       <div class="table-wrap">
@@ -79,7 +84,13 @@
     </section>
 
     <section class="card span-3 live-card">
-      <div class="card-head"><h2>Live Traffic</h2><span class="muted">most recent packets</span></div>
+      <div class="card-head">
+        <h2>Live Traffic</h2>
+        <div class="alert-tools">
+          <span class="muted">most recent packets</span>
+          <button id="pause-btn" class="mini-btn" title="Freeze the table to inspect rows">⏸ Pause</button>
+        </div>
+      </div>
       <div class="table-wrap short">
         <table id="packets-table">
           <thead><tr><th>Time</th><th>Proto</th><th>Source</th><th>Destination</th><th>Len</th><th>Info</th></tr></thead>
@@ -88,6 +99,21 @@
       </div>
     </section>
   </main>
+
+  <div id="rules-modal" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Loaded Signatures</h3>
+        <div class="modal-actions">
+          <button id="rules-reload" class="mini-btn" type="button" title="Re-read the rules file without restarting">Reload from disk</button>
+          <button id="rules-close" class="mini-btn" type="button">Close ✕</button>
+        </div>
+      </div>
+      <div id="rules-body" class="modal-body rules-list"></div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <div id="log-modal" class="modal-overlay" hidden>
     <div class="modal">

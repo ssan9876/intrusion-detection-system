@@ -3,21 +3,31 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import csv
+import io
 import json
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlsplit
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from .capture import SCAPY_AVAILABLE, Sensor
 from .config import Config
 from .engine import Engine
-from .rules import RuleSet
+from .rules import RuleError, RuleSet
 from .store import Alert, Store
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+
+# Archived reports are only ever named nids-YYYY-MM-DD[.HHMMSS suffix].txt/.json;
+# anything else is rejected before touching the filesystem.
+LOG_NAME_RE = re.compile(r"^nids-\d{4}-\d{2}-\d{2}(_\d{6})?\.(txt|json)$")
+
+SEVERITY_VALUES = {"low", "medium", "high", "critical"}
 
 
 def _seconds_until_hour(hour: int) -> float:
@@ -27,6 +37,21 @@ def _seconds_until_hour(hour: int) -> float:
     if target <= now:
         target += timedelta(days=1)
     return (target - now).total_seconds()
+
+
+def _require_same_origin(request: Request) -> None:
+    """CSRF guard for state-changing endpoints.
+
+    Browsers attach Origin to cross-site POSTs; if one is present it must match
+    the host we're being addressed as. Non-browser clients (curl, scripts) send
+    no Origin and pass through.
+    """
+    origin = request.headers.get("origin")
+    if not origin:
+        return
+    origin_host = urlsplit(origin).netloc
+    if origin_host != request.headers.get("host", ""):
+        raise HTTPException(status_code=403, detail="cross-origin request rejected")
 
 
 class Hub:
@@ -72,33 +97,13 @@ def create_app(config: Config) -> FastAPI:
         max_recent=config.max_recent_packets,
         max_flows=config.max_flows,
         alert_history=config.alert_history,
+        max_talkers=config.max_talkers,
     )
     hub = Hub()
     sensor = Sensor(
         config, engine, store,
         on_alert=lambda a: hub.broadcast_threadsafe({"type": "alert", "alert": a.as_dict()}),
     )
-
-    app = FastAPI(title="Signature NIDS", version="0.1.0")
-
-    @app.on_event("startup")
-    async def _startup() -> None:
-        hub.loop = asyncio.get_running_loop()
-        sensor.start()
-        # prune stale reports once at startup
-        pruned = store.prune_logs(config.log_dir, config.log_retention_days)
-        if pruned:
-            print(f"[prune] removed {len(pruned)} report file(s) older than {config.log_retention_days}d")
-        app.state.pusher = asyncio.create_task(_push_snapshots())
-        app.state.roller = asyncio.create_task(_daily_rollover())
-
-    @app.on_event("shutdown")
-    async def _shutdown() -> None:
-        for task in (app.state.pusher, app.state.roller):
-            task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await task
-        sensor.stop()
 
     async def _push_snapshots() -> None:
         while True:
@@ -120,6 +125,27 @@ def create_app(config: Config) -> FastAPI:
                 print(f"[rollover] failed: {exc!r}")
             await asyncio.sleep(60)  # ensure we move past the trigger minute
 
+    @contextlib.asynccontextmanager
+    async def _lifespan(app: FastAPI):
+        hub.loop = asyncio.get_running_loop()
+        sensor.start()
+        # prune stale reports once at startup
+        pruned = store.prune_logs(config.log_dir, config.log_retention_days)
+        if pruned:
+            print(f"[prune] removed {len(pruned)} report file(s) older than {config.log_retention_days}d")
+        pusher = asyncio.create_task(_push_snapshots())
+        roller = asyncio.create_task(_daily_rollover())
+        try:
+            yield
+        finally:
+            for task in (pusher, roller):
+                task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await task
+            sensor.stop()
+
+    app = FastAPI(title="Signature NIDS", version="0.2.0", lifespan=_lifespan)
+
     @app.get("/api/status")
     async def status() -> dict:
         return {
@@ -135,8 +161,36 @@ def create_app(config: Config) -> FastAPI:
         return store.snapshot()
 
     @app.get("/api/alerts")
-    async def alerts(limit: int = 200, severity: str | None = None) -> list[dict]:
+    async def alerts(
+        limit: int = Query(200, ge=1, le=5000),
+        severity: str | None = Query(None),
+    ) -> list[dict]:
+        if severity is not None and severity not in SEVERITY_VALUES:
+            raise HTTPException(status_code=400, detail="invalid severity")
         return store.query_alerts(limit=limit, severity=severity)
+
+    @app.get("/api/alerts.csv")
+    async def alerts_csv(
+        limit: int = Query(1000, ge=1, le=100000),
+        severity: str | None = Query(None),
+    ) -> Response:
+        """Alert history as CSV, for spreadsheets / SIEM import."""
+        if severity is not None and severity not in SEVERITY_VALUES:
+            raise HTTPException(status_code=400, detail="invalid severity")
+        rows = store.query_alerts(limit=limit, severity=severity)
+        buf = io.StringIO()
+        fields = ["ts", "time", "severity", "rule_id", "rule_name", "category",
+                  "src", "sport", "dst", "dport", "proto", "detail"]
+        w = csv.DictWriter(buf, fieldnames=fields, extrasaction="ignore")
+        w.writeheader()
+        for r in rows:
+            r["time"] = datetime.fromtimestamp(r["ts"]).isoformat(timespec="seconds")
+            w.writerow(r)
+        filename = f"nids-alerts-{datetime.now().strftime('%Y%m%d-%H%M%S')}.csv"
+        return Response(
+            buf.getvalue(), media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
 
     @app.get("/api/logs")
     async def list_logs() -> dict:
@@ -151,7 +205,7 @@ def create_app(config: Config) -> FastAPI:
                 # the matching structured report, if present
                 "json": p.with_suffix(".json").name if p.with_suffix(".json").is_file() else None,
             })
-        nxt = datetime.now() + timedelta(seconds=_seconds_until_hour(config.rollover_hour))
+        nxt = datetime.now().astimezone() + timedelta(seconds=_seconds_until_hour(config.rollover_hour))
         return {
             "rollover_hour": config.rollover_hour,
             "next_rollover": nxt.isoformat(timespec="seconds"),
@@ -163,19 +217,20 @@ def create_app(config: Config) -> FastAPI:
     @app.get("/api/logs/{name}")
     async def get_log(name: str, download: bool = False):
         """Return an archived report. ?download=1 forces a file download."""
-        # prevent path traversal; only serve report files from the log dir
-        if "/" in name or "\\" in name or ".." in name or not name.startswith("nids-"):
+        # strict allow-list of report names; blocks traversal and header injection
+        if not LOG_NAME_RE.match(name):
             raise HTTPException(status_code=400, detail="invalid name")
         path = config.log_dir / name
         if not path.is_file():
             raise HTTPException(status_code=404, detail="not found")
         media = "application/json" if path.suffix == ".json" else "text/plain"
         headers = {"Content-Disposition": f'attachment; filename="{name}"'} if download else {}
-        return PlainTextResponse(path.read_text(encoding="utf-8"), media_type=media, headers=headers)
+        return FileResponse(path, media_type=media, headers=headers)
 
     @app.post("/api/rollover")
-    async def rollover() -> dict:
+    async def rollover(request: Request) -> dict:
         """Manually trigger the daily archive + stats reset (used for testing)."""
+        _require_same_origin(request)
         path = store.export_and_reset(config.log_dir)
         await hub.broadcast({"type": "rollover", "file": path.name})
         return {"ok": True, "log": path.name}
@@ -187,13 +242,32 @@ def create_app(config: Config) -> FastAPI:
                 "id": r.id, "name": r.name, "severity": r.severity,
                 "category": r.category, "protocol": r.protocol,
                 "src_port": r.src_port, "dst_port": r.dst_port,
-                "references": r.references,
+                "content": r.content, "content_hex": r.content_hex,
+                "regex": r.regex, "references": r.references,
             }
-            for r in ruleset.rules
+            for r in engine.ruleset.rules
         ]
+
+    @app.post("/api/rules/reload")
+    async def reload_rules(request: Request) -> dict:
+        """Re-read the signature file and hot-swap it into the engine."""
+        _require_same_origin(request)
+        try:
+            new_set = RuleSet.load(config.rules_path)
+        except (RuleError, OSError, json.JSONDecodeError) as exc:
+            raise HTTPException(status_code=400, detail=f"rules not reloaded: {exc}")
+        engine.reload(new_set)
+        await hub.broadcast({"type": "rules", "count": engine.rule_count})
+        return {"ok": True, "rules_loaded": engine.rule_count}
 
     @app.websocket("/ws")
     async def ws_endpoint(ws: WebSocket) -> None:
+        # Reject cross-site WebSocket connections: browsers always send Origin,
+        # and without this check any web page could read the live traffic feed.
+        origin = ws.headers.get("origin")
+        if origin and urlsplit(origin).netloc != ws.headers.get("host", ""):
+            await ws.close(code=4403)
+            return
         await hub.connect(ws)
         try:
             # send an immediate snapshot so the page isn't blank for up to 1s

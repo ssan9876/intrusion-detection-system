@@ -62,11 +62,13 @@ class FlowStat:
 
 
 class Store:
-    def __init__(self, db_path: Path, max_recent: int, max_flows: int, alert_history: int):
+    def __init__(self, db_path: Path, max_recent: int, max_flows: int, alert_history: int,
+                 max_talkers: int = 2000):
         self.db_path = db_path
         self.max_recent = max_recent
         self.max_flows = max_flows
         self.alert_history = alert_history
+        self.max_talkers = max_talkers
 
         self._lock = threading.Lock()
         self.recent_packets: deque[PacketRecord] = deque(maxlen=max_recent)
@@ -125,6 +127,10 @@ class Store:
             self.total_bytes += pkt.length
             self.proto_counts[pkt.proto] += 1
             self.talker_bytes[pkt.src] += pkt.length
+            # keep the talker table bounded: on overflow keep the biggest senders
+            if len(self.talker_bytes) > self.max_talkers * 2:
+                top = sorted(self.talker_bytes.items(), key=lambda kv: kv[1], reverse=True)
+                self.talker_bytes = defaultdict(int, top[: self.max_talkers])
 
             key = (pkt.src, pkt.dst, pkt.proto)
             flow = self.flows.get(key)

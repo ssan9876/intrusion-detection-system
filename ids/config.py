@@ -61,6 +61,14 @@ class Config:
     max_recent_packets: int = field(default_factory=lambda: _env_int("IDS_MAX_RECENT_PACKETS", 500))
     max_flows: int = field(default_factory=lambda: _env_int("IDS_MAX_FLOWS", 200))
     alert_history: int = field(default_factory=lambda: _env_int("IDS_ALERT_HISTORY", 1000))
+    # Most distinct source IPs tracked for the "top talkers" stats. Bounds
+    # memory on networks with many/spoofed sources; the biggest senders win.
+    max_talkers: int = field(default_factory=lambda: _env_int("IDS_MAX_TALKERS", 2000))
+
+    # Port-scan detector: alert when one source touches at least this many
+    # distinct destination ports within the window (seconds).
+    portscan_threshold: int = field(default_factory=lambda: _env_int("IDS_PORTSCAN_THRESHOLD", 15))
+    portscan_window: int = field(default_factory=lambda: _env_int("IDS_PORTSCAN_WINDOW", 10))
 
     def ensure_dirs(self) -> None:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)

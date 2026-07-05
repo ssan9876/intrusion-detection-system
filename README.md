@@ -32,6 +32,10 @@ mix, and security alerts in real time.
   whole system work.
 - **Engine** (`ids/engine.py`, `ids/rules.py`) — matches packets against a JSON
   signature set by protocol, ports, and payload (ASCII / hex / regex).
+- **Detectors** (`ids/detectors.py`) — stateful heuristics that no single
+  packet can trigger. Currently: a **port-scan detector** that alerts when one
+  source probes ≥ `IDS_PORTSCAN_THRESHOLD` distinct ports (default 15) within
+  `IDS_PORTSCAN_WINDOW` seconds (default 10).
 - **Store** (`ids/store.py`) — in-memory live stats; alerts persisted to SQLite.
 - **Server** (`ids/server.py`) — dashboard, REST API, and a WebSocket live feed.
 
@@ -79,7 +83,13 @@ Rules live in `rules/default.rules.json`. Each rule:
 ```
 
 Match priority: `content` / `content_hex` / `regex` are all checked against the
-payload; `src_port`/`dst_port`/`protocol` filter first. Reload by restarting.
+payload; `src_port`/`dst_port`/`protocol` filter first.
+
+Reload without restarting: click the **rules pill** in the dashboard header and
+hit **Reload from disk**, or `POST /api/rules/reload`. If the edited file is
+invalid (bad regex, duplicate id, unknown protocol…) the reload is rejected
+with a message naming the offending rule and the old ruleset stays active.
+The same pill opens a browser for every loaded signature.
 
 ## ⚠️ Seeing the whole network, not just this host
 
@@ -115,6 +125,26 @@ The dashboard's **Daily Reports** card lists archives newest-first. Click a name
 
 Reports older than `IDS_LOG_RETENTION_DAYS` (default **90**) are pruned
 automatically at each rollover and on startup; set it to `0` to keep forever.
+
+## Alert export & API security
+
+- **CSV export** — the ⬇ CSV button on the Security Alerts card (or
+  `GET /api/alerts.csv?limit=…&severity=…`) downloads the alert history for
+  spreadsheets / SIEM import.
+- The WebSocket feed and the state-changing endpoints (`POST /api/rollover`,
+  `POST /api/rules/reload`) reject cross-origin browser requests, so a web page
+  you happen to visit can't read your traffic feed or reset your stats.
+- The dashboard itself has **no authentication** — anyone who can reach the
+  port sees your network activity. Bind it to a management network
+  (`IDS_HOST`), or put it behind a reverse proxy with auth if it must be
+  reachable more widely.
+
+## Tests
+
+```bash
+pip install pytest httpx
+python -m pytest tests/
+```
 
 ## Deployment
 
