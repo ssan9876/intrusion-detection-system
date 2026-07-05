@@ -15,6 +15,7 @@ from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocket
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+from . import __version__
 from .capture import SCAPY_AVAILABLE, Sensor
 from .config import Config
 from .engine import Engine
@@ -144,11 +145,12 @@ def create_app(config: Config) -> FastAPI:
                     await task
             sensor.stop()
 
-    app = FastAPI(title="Signature NIDS", version="0.2.0", lifespan=_lifespan)
+    app = FastAPI(title="Signature NIDS", version=__version__, lifespan=_lifespan)
 
     @app.get("/api/status")
     async def status() -> dict:
         return {
+            "version": __version__,
             "mode": sensor.mode,
             "scapy_available": SCAPY_AVAILABLE,
             "interface": config.interface or "default",

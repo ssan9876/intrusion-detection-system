@@ -34,6 +34,7 @@ body {
 .brand { display: flex; align-items: center; gap: 12px; }
 .logo { font-size: 26px; color: var(--accent); }
 .brand h1 { font-size: 17px; margin: 0; letter-spacing: .3px; }
+.brand h1 .version { font-size: 11px; color: var(--muted); font-family: var(--mono); font-weight: 400; letter-spacing: 0; }
 .subtitle { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
 .status-cluster { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .pill {

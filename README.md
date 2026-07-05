@@ -149,4 +149,25 @@ python -m pytest tests/
 ## Deployment
 
 See [`deploy/README-proxmox.md`](deploy/README-proxmox.md) for running this as a
-Proxmox LXC with storage backed by TrueNAS.
+Proxmox LXC with storage backed by TrueNAS. First-time install inside the
+container is `bash deploy/install.sh`.
+
+## Updating an existing install
+
+Upgrades preserve your alert DB, daily logs, and `/etc/nids/nids.env` — only the
+code, dependencies, and systemd unit are refreshed. From a checkout of the repo:
+
+```bash
+git pull                       # get the new version
+sudo bash deploy/update.sh     # validate rules, redeploy, restart, report version
+```
+
+`install.sh` also copies the updater to `/opt/nids/update.sh`, so on a deployed
+box you can simply `sudo /opt/nids/update.sh` after pulling. The script validates
+the new ruleset before touching the running service and aborts if it won't load,
+so a bad edit can't take the sensor down. The running version is shown in the
+dashboard header and at `GET /api/status`; see
+[`CHANGELOG.md`](CHANGELOG.md) for what changed between versions.
+
+If you edited rules and just want them live, you don't need to redeploy at all —
+click **Reload from disk** in the signature browser or `POST /api/rules/reload`.

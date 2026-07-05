@@ -45,6 +45,27 @@ pct exec 108 -- bash /root/nids-src/deploy/install.sh
 
 Dashboard: `http://<container-ip>:8080`.
 
+## 3b. Updating an existing install
+
+Upgrades are one command and never touch your alert DB, daily logs, or
+`/etc/nids/nids.env`. `install.sh` drops the updater at `/opt/nids/update.sh`:
+
+```bash
+# push/pull the latest repo into the container, then:
+pct exec 108 -- bash /root/nids-src/deploy/update.sh
+```
+
+It fast-forwards a git checkout if the source is one, validates the new rules
+before deploying, refreshes the code + dependencies + systemd unit, restarts the
+service, and prints the new version. Check it took with:
+
+```bash
+pct exec 108 -- curl -s http://localhost:8080/api/status
+```
+
+Rolling back is just as easy — check out the previous tag/commit and re-run
+`update.sh`.
+
 ## 4. Seeing more than the container's own traffic
 
 The LXC's `eth0` only receives its own + broadcast traffic. To inspect other

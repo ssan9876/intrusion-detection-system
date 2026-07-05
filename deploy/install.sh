@@ -27,6 +27,9 @@ echo "[*] Installing config + systemd unit"
 mkdir -p /etc/nids
 [ -f /etc/nids/nids.env ] || cp "$SRC_DIR/deploy/nids.env.example" /etc/nids/nids.env
 cp "$SRC_DIR/deploy/nids.service" /etc/systemd/system/nids.service
+# keep the updater alongside the app so later upgrades are one command
+cp "$SRC_DIR/deploy/update.sh" "$APP_DIR/update.sh"
+chmod +x "$APP_DIR/update.sh"
 chown -R nids:nids "$APP_DIR/data"
 
 echo "[*] Enabling service"

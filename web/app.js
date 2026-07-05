@@ -62,6 +62,7 @@
     try {
       const s = await (await fetch("/api/status")).json();
       $("rules-count").textContent = s.rules_loaded;
+      if (s.version) $("version").textContent = "v" + s.version;
       $("iface-text").textContent = s.mode === "demo" ? "demo data" : s.interface;
       const pill = $("mode-pill"), dot = pill.querySelector(".dot");
       $("mode-text").textContent = s.mode === "live" ? "LIVE CAPTURE" : (s.mode === "demo" ? "DEMO MODE" : s.mode);
