@@ -11,7 +11,9 @@ from .rules import Rule, RuleSet
 
 
 class Engine:
-    def __init__(self, ruleset: RuleSet):
+    def __init__(self, ruleset: RuleSet, disabled: set[str] | None = None):
+        # ids of rules switched off from the dashboard; evaluate() skips them
+        self.disabled: set[str] = set(disabled or ())
         self.reload(ruleset)
 
     def reload(self, ruleset: RuleSet) -> None:
@@ -42,7 +44,10 @@ class Engine:
     ) -> list[Rule]:
         """Return all rules that match this packet."""
         hits: list[Rule] = []
+        disabled = self.disabled
         for rule in self._candidate_rules(proto):
+            if rule.id in disabled:
+                continue
             if rule.src_port is not None and rule.src_port != sport:
                 continue
             if rule.dst_port is not None and rule.dst_port != dport:

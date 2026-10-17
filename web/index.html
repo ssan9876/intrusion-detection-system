@@ -3,131 +3,242 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Signature NIDS — Network Monitor</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 4 7v8c0 8 5.3 13.4 12 15 6.7-1.6 12-7 12-15V7L16 2z' fill='%2338bdf8'/%3E%3Cpath d='M10 16.5l4 4 8-8' stroke='%230b0f17' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Signature NIDS</title>
+  <link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5 5 7v8.2c0 6.9 4.6 12.2 11 14.3 6.4-2.1 11-7.4 11-14.3V7L16 2.5z' fill='%232a62b8'/%3E%3Cpath d='M9.5 17h3.2l2-5 2.6 9 2-4h3.2' stroke='%23fff' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="/static/style.css" />
+  <script>
+    // apply the saved theme before first paint so there is no flash
+    try { const t = JSON.parse(localStorage.getItem("nids.theme")); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
+  </script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo">◈</span>
-      <div>
-        <h1>Signature NIDS <span class="version" id="version" title="Running version"></span></h1>
-        <span class="subtitle">Network Intrusion Detection</span>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-mark" viewBox="0 0 24 24"><path d="M12 2.2 3.8 5.6v6.1c0 5.2 3.4 9.1 8.2 10.7 4.8-1.6 8.2-5.5 8.2-10.7V5.6L12 2.2z" fill="currentColor" stroke="none"/><path d="M7.1 12.8h2.4l1.5-3.8 2 6.8 1.5-3h2.4" fill="none" stroke="var(--mark-ink, #fff)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5.5v13M15 5.5v13"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2v13.6L18.5 12z"/></symbol>
+      <symbol id="i-reload" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4.2h-4.2"/></symbol>
+      <symbol id="i-rollover" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5 8.5v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-10M10 12.5h4"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.8"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5 7 7M17 17l1.5 1.5M5.5 18.5 7 17M17 7l1.5-1.5"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z"/></symbol>
+      <symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></symbol>
+      <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2.8" y="6" width="18.4" height="12" rx="1.5"/><path d="M6.5 9.5h.01M10 9.5h.01M13.5 9.5h.01M17 9.5h.01M7.5 14.5h9"/></symbol>
+      <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6.2 7.4v5.4L10.2 19.6v-7.2z"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+      <symbol id="i-apply" viewBox="0 0 24 24"><path d="M4.5 12h14M13 6.5 18.5 12 13 17.5"/></symbol>
+      <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 6.5 15 12l-5.5 5.5"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.8l4.4 4.4L19 7.6"/></symbol>
+      <symbol id="i-fp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M6.4 6.4l11.2 11.2"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14.5 4.5 10 9 5.5"/><path d="M4.5 10h10a5 5 0 0 1 0 10h-3"/></symbol>
+      <symbol id="i-mute" viewBox="0 0 24 24"><path d="M10 18.5a2 2 0 0 0 4 0M6.4 8.9A5.6 5.6 0 0 1 16.3 6M17.6 10v3.6l1.9 2.9H8.2M3.5 3.5l17 17"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24"><path d="M10 18.5a2 2 0 0 0 4 0M6.4 10a5.6 5.6 0 0 1 11.2 0v3.6l1.9 2.9h-15l1.9-2.9z"/></symbol>
+      <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3.5v8"/><path d="M7.2 6.8a7 7 0 1 0 9.6 0"/></symbol>
+      <symbol id="i-host" viewBox="0 0 24 24"><rect x="4" y="4.5" width="16" height="6" rx="1"/><rect x="4" y="13.5" width="16" height="6" rx="1"/><path d="M7.5 7.5h.01M7.5 16.5h.01"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M13.5 4.5h6v6M19.5 4.5l-8.5 8.5M17.5 14v5.5h-13v-13H10"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="1.5"/><path d="M15.5 8.5V5.5a1 1 0 0 0-1-1h-9a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4M9 12.5h6M9 16h6"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+      <symbol id="sev-low" viewBox="0 0 12 12"><circle cx="6" cy="6" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+      <symbol id="sev-medium" viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.2" fill="currentColor"/></symbol>
+      <symbol id="sev-high" viewBox="0 0 12 12"><path d="M6 1.4 11.2 10.4H.8z" fill="currentColor"/></symbol>
+      <symbol id="sev-critical" viewBox="0 0 12 12"><path d="M6 .2 11.8 6 6 11.8.2 6z" fill="currentColor"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <header class="toolbar">
+      <div class="brand">
+        <svg class="brand-mark" aria-hidden="true"><use href="#i-mark"/></svg>
+        <span class="brand-name">Signature NIDS</span>
+        <span class="brand-version" id="version"></span>
       </div>
+      <div class="tool-sep" aria-hidden="true"></div>
+      <div class="tool-group" role="toolbar" aria-label="Capture">
+        <button class="tool" id="btn-pause" type="button" aria-pressed="false" title="Pause live updates (Space)">
+          <svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg><span class="tool-label">Pause</span>
+        </button>
+        <button class="tool" id="btn-reload" type="button" title="Re-read the rules file without restarting">
+          <svg class="ic" aria-hidden="true"><use href="#i-reload"/></svg><span class="tool-label">Reload rules</span>
+        </button>
+        <button class="tool" id="btn-rollover" type="button" title="Archive today's activity and reset live stats">
+          <svg class="ic" aria-hidden="true"><use href="#i-rollover"/></svg><span class="tool-label">Roll over</span>
+        </button>
+        <a class="tool" id="btn-export" href="/api/alerts.csv" title="Download alert history as CSV">
+          <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span class="tool-label">Export CSV</span>
+        </a>
+      </div>
+      <div class="toolbar-right">
+        <span class="capture" id="capture"><span class="led" id="capture-led"></span><span id="capture-text">Connecting…</span></span>
+        <button class="tool icon-only" id="btn-theme" type="button" title="Theme: follows system" aria-label="Switch theme">
+          <svg class="ic" aria-hidden="true"><use href="#i-auto"/></svg>
+        </button>
+        <button class="tool icon-only" id="btn-help" type="button" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">
+          <svg class="ic" aria-hidden="true"><use href="#i-keyboard"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button role="tab" class="tab" data-view="alerts" aria-selected="true">Alerts <span class="tab-count" id="count-alerts"></span></button>
+      <button role="tab" class="tab" data-view="packets" aria-selected="false">Packets</button>
+      <button role="tab" class="tab" data-view="endpoints" aria-selected="false">Endpoints <span class="tab-count" id="count-endpoints"></span></button>
+      <button role="tab" class="tab" data-view="conversations" aria-selected="false">Conversations <span class="tab-count" id="count-flows"></span></button>
+      <button role="tab" class="tab" data-view="signatures" aria-selected="false">Signatures <span class="tab-count" id="count-rules"></span></button>
+      <button role="tab" class="tab" data-view="iograph" aria-selected="false">I/O Graph</button>
+      <button role="tab" class="tab" data-view="reports" aria-selected="false">Reports</button>
+    </nav>
+
+    <div class="filterbar" id="filterbar">
+      <div class="filter-field" id="filter-field">
+        <svg class="ic filter-ic" aria-hidden="true"><use href="#i-filter"/></svg>
+        <input id="filter" class="filter-input" type="text" spellcheck="false" autocomplete="off"
+               aria-label="Display filter" aria-describedby="filter-msg" aria-autocomplete="list"
+               aria-controls="filter-suggest" />
+        <button class="filter-btn" id="filter-clear" type="button" title="Clear filter" aria-label="Clear filter">
+          <svg class="ic" aria-hidden="true"><use href="#i-x"/></svg>
+        </button>
+        <button class="filter-btn filter-apply" id="filter-apply" type="button" title="Apply filter (Enter)" aria-label="Apply filter">
+          <svg class="ic" aria-hidden="true"><use href="#i-apply"/></svg>
+        </button>
+        <ul class="suggest" id="filter-suggest" role="listbox" hidden></ul>
+      </div>
+      <div class="presets" id="presets" aria-label="Saved filters"></div>
     </div>
-    <div class="status-cluster">
-      <div class="pill" id="mode-pill"><span class="dot"></span><span id="mode-text">connecting…</span></div>
-      <div class="pill pill-btn" id="rules-pill" title="Browse loaded signatures"><span id="rules-count">0</span>&nbsp;rules</div>
-      <div class="pill"><span id="iface-text">—</span></div>
-      <div class="pill" id="conn-pill"><span class="dot dot-amber"></span>WS</div>
-    </div>
-  </header>
 
-  <main class="grid">
-    <section class="card stat"><div class="stat-label">Packets</div><div class="stat-value" id="stat-packets">0</div><div class="stat-sub" id="stat-pps">0 pps</div></section>
-    <section class="card stat"><div class="stat-label">Traffic</div><div class="stat-value" id="stat-bytes">0 B</div><div class="stat-sub" id="stat-bps">0 bps</div></section>
-    <section class="card stat"><div class="stat-label">Active Flows</div><div class="stat-value" id="stat-flows">0</div><div class="stat-sub">src→dst pairs</div></section>
-    <section class="card stat alert-stat"><div class="stat-label">Alerts</div><div class="stat-value" id="stat-alerts">0</div><div class="stat-sub" id="stat-uptime">up 0s</div></section>
-
-    <section class="card span-2 chart-card">
-      <div class="card-head"><h2>Throughput — last 60s</h2><span class="muted" id="chart-peak"></span></div>
-      <canvas id="bw-chart" height="160"></canvas>
-    </section>
-
-    <section class="card severity-card">
-      <div class="card-head"><h2>Severity</h2></div>
-      <div id="severity-bars"></div>
-    </section>
-
-    <section class="card protocol-card">
-      <div class="card-head"><h2>Protocols</h2></div>
-      <canvas id="proto-chart" height="160"></canvas>
-      <div id="proto-legend" class="legend"></div>
-    </section>
-
-    <section class="card span-2 alerts-card">
-      <div class="card-head">
-        <h2>Security Alerts</h2>
-        <div class="alert-tools">
-          <input id="alert-search" type="search" placeholder="filter: rule, host, detail…" autocomplete="off" />
-          <div class="filters" id="sev-filter">
-            <button class="active" data-sev="">All</button>
-            <button data-sev="critical">Critical</button>
-            <button data-sev="high">High</button>
-            <button data-sev="medium">Medium</button>
-            <button data-sev="low">Low</button>
+    <main class="views">
+      <!-- Alerts: list / dissection tree / hex, as in a packet analyzer -->
+      <section class="view" id="view-alerts" data-view="alerts">
+        <div class="overview">
+          <p class="summary" id="summary"><span class="state-word" id="state-word">Connecting</span><span class="state-detail" id="state-detail"></span><span class="facts" id="facts"></span></p>
+          <div class="overview-plot">
+            <canvas id="io-mini" aria-label="Throughput over the last 60 seconds with alert ticks" role="img"></canvas>
           </div>
-          <a class="mini-btn" href="/api/alerts.csv" title="Export alert history as CSV">⬇ CSV</a>
         </div>
-      </div>
-      <div class="table-wrap">
-        <table id="alerts-table">
-          <thead><tr><th>Time</th><th>Sev</th><th>Signature</th><th>Source</th><th>Destination</th><th>Detail</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="card talkers-card">
-      <div class="card-head"><h2>Top Talkers</h2></div>
-      <div id="talkers-list" class="bars"></div>
-    </section>
-
-    <section class="card logs-card">
-      <div class="card-head">
-        <h2>Daily Reports</h2>
-        <button id="rollover-btn" class="mini-btn" title="Archive today and reset stats now">Roll over now</button>
-      </div>
-      <div class="muted" id="rollover-info" style="margin-bottom:8px">—</div>
-      <div id="logs-list" class="logs-list"></div>
-    </section>
-
-    <section class="card span-3 live-card">
-      <div class="card-head">
-        <h2>Live Traffic</h2>
-        <div class="alert-tools">
-          <span class="muted">most recent packets</span>
-          <button id="pause-btn" class="mini-btn" title="Freeze the table to inspect rows">⏸ Pause</button>
+        <div class="panes panes-3" id="alert-panes">
+          <div class="pane" id="alert-list"></div>
+          <div class="splitter" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize alert list"></div>
+          <div class="pane pane-detail">
+            <div class="pane-head" id="alert-actions"></div>
+            <div class="tree-scroll"><div class="tree" id="alert-tree" role="tree" aria-label="Alert details"></div></div>
+          </div>
+          <div class="splitter" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize byte view"></div>
+          <div class="pane pane-hex"><div class="hex" id="alert-hex" aria-label="Payload bytes"></div></div>
         </div>
-      </div>
-      <div class="table-wrap short">
-        <table id="packets-table">
-          <thead><tr><th>Time</th><th>Proto</th><th>Source</th><th>Destination</th><th>Len</th><th>Info</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <div id="rules-modal" class="modal-overlay" hidden>
-    <div class="modal">
-      <div class="modal-head">
-        <h3>Loaded Signatures</h3>
-        <div class="modal-actions">
-          <button id="rules-reload" class="mini-btn" type="button" title="Re-read the rules file without restarting">Reload from disk</button>
-          <button id="rules-close" class="mini-btn" type="button">Close ✕</button>
+      <section class="view" id="view-packets" data-view="packets" hidden>
+        <div class="panes panes-2" id="packet-panes">
+          <div class="pane" id="packet-list"></div>
+          <div class="splitter" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize packet list"></div>
+          <div class="pane pane-detail"><div class="tree-scroll"><div class="tree" id="packet-tree" role="tree" aria-label="Packet details"></div></div></div>
         </div>
-      </div>
-      <div id="rules-body" class="modal-body rules-list"></div>
-    </div>
+      </section>
+
+      <section class="view" id="view-endpoints" data-view="endpoints" hidden>
+        <div class="panes panes-2" id="host-panes">
+          <div class="pane" id="host-list"></div>
+          <div class="splitter" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize endpoint list"></div>
+          <div class="pane pane-detail">
+            <div class="pane-head" id="host-actions"></div>
+            <div class="host-detail" id="host-detail"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-conversations" data-view="conversations" hidden>
+        <div class="panes panes-1"><div class="pane" id="flow-list"></div></div>
+      </section>
+
+      <section class="view" id="view-signatures" data-view="signatures" hidden>
+        <div class="panes panes-2" id="rule-panes">
+          <div class="pane" id="rule-list"></div>
+          <div class="splitter" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize signature list"></div>
+          <div class="pane pane-detail">
+            <div class="pane-head" id="rule-actions"></div>
+            <div class="rule-detail" id="rule-detail"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view view-scroll" id="view-iograph" data-view="iograph" hidden>
+        <div class="stats">
+          <div class="stats-head">
+            <h2 class="stats-title">Alerts over time</h2>
+            <div class="seg" id="range" role="radiogroup" aria-label="Time range">
+              <button type="button" role="radio" data-hours="1" aria-checked="false">1 h</button>
+              <button type="button" role="radio" data-hours="6" aria-checked="false">6 h</button>
+              <button type="button" role="radio" data-hours="24" aria-checked="true">24 h</button>
+              <button type="button" role="radio" data-hours="168" aria-checked="false">7 d</button>
+            </div>
+            <div class="legend" id="sev-legend"></div>
+          </div>
+          <div class="plot plot-tall"><canvas id="timeline" role="img" aria-label="Alerts per interval by severity"></canvas><div class="plot-tip" id="timeline-tip" hidden></div></div>
+          <h2 class="stats-title">Throughput, last 60 s</h2>
+          <div class="plot"><canvas id="io-big" role="img" aria-label="Bytes per second over the last 60 seconds"></canvas></div>
+          <div class="stat-tables" id="stat-tables"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-reports" data-view="reports" hidden>
+        <div class="panes panes-split">
+          <div class="pane reports-side">
+            <div class="pane-head" id="reports-head"></div>
+            <div id="report-list" class="report-list"></div>
+          </div>
+          <div class="pane reports-main">
+            <div class="pane-head" id="report-actions"></div>
+            <pre class="report-text" id="report-text"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="statusbar" id="statusbar">
+      <button class="expert" id="expert" type="button" title="Show untriaged alerts"><span class="expert-dot" id="expert-dot"></span><span id="expert-text">—</span></button>
+      <span class="status-msg" id="filter-msg" role="status" aria-live="polite"></span>
+      <span class="status-cells" id="status-cells"></span>
+    </footer>
   </div>
 
-  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <div class="ctx-menu" id="ctx-menu" role="menu" hidden></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
 
-  <div id="log-modal" class="modal-overlay" hidden>
-    <div class="modal">
-      <div class="modal-head">
-        <h3 id="modal-title">log</h3>
-        <div class="modal-actions">
-          <a id="modal-download" class="mini-btn" href="#">Download .txt</a>
-          <button id="modal-close" class="mini-btn" type="button">Close ✕</button>
-        </div>
+  <dialog class="dialog" id="dlg-help" aria-labelledby="dlg-help-title">
+    <form method="dialog">
+      <h2 id="dlg-help-title">Keyboard shortcuts</h2>
+      <dl class="keys">
+        <dt><kbd>1</kbd>–<kbd>7</kbd></dt><dd>Switch view</dd>
+        <dt><kbd>/</kbd> <kbd>Ctrl</kbd>+<kbd>/</kbd></dt><dd>Focus the display filter</dd>
+        <dt><kbd>Esc</kbd></dt><dd>Leave the filter, close menus</dd>
+        <dt><kbd>j</kbd> <kbd>k</kbd> <kbd>↓</kbd> <kbd>↑</kbd></dt><dd>Next / previous row</dd>
+        <dt><kbd>a</kbd></dt><dd>Acknowledge selected alert</dd>
+        <dt><kbd>f</kbd></dt><dd>Mark as false positive</dd>
+        <dt><kbd>u</kbd></dt><dd>Reopen (back to new)</dd>
+        <dt><kbd>m</kbd></dt><dd>Mute the alert's signature for 1 hour</dd>
+        <dt><kbd>h</kbd></dt><dd>Open the source host in Endpoints</dd>
+        <dt><kbd>Space</kbd></dt><dd>Pause / resume live updates</dd>
+        <dt><kbd>t</kbd></dt><dd>Cycle theme</dd>
+      </dl>
+      <h3>Filter fields</h3>
+      <p class="dlg-note">Combine with <code>&amp;&amp;</code> <code>||</code> <code>!</code> and parentheses. Compare with <code>==</code> <code>!=</code> <code>&gt;=</code> <code>contains</code> <code>matches</code>. A plain or "quoted" word searches every text field.</p>
+      <div class="field-help" id="field-help"></div>
+      <div class="dlg-actions"><button class="btn" value="close">Close</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="dlg-confirm" aria-labelledby="dlg-confirm-title">
+    <form method="dialog">
+      <h2 id="dlg-confirm-title"></h2>
+      <p id="dlg-confirm-body"></p>
+      <div class="dlg-actions">
+        <button class="btn" value="cancel">Cancel</button>
+        <button class="btn btn-primary" value="ok" id="dlg-confirm-ok">Confirm</button>
       </div>
-      <pre id="modal-body" class="modal-body">loading…</pre>
-    </div>
-  </div>
+    </form>
+  </dialog>
 
-  <script src="/static/app.js"></script>
+  <script type="module" src="/static/app.js"></script>
 </body>
 </html>

