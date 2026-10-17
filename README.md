@@ -39,6 +39,49 @@ mix, and security alerts in real time.
 - **Store** (`ids/store.py`) — in-memory live stats; alerts persisted to SQLite.
 - **Server** (`ids/server.py`) — dashboard, REST API, and a WebSocket live feed.
 
+## The dashboard
+
+The dashboard is laid out like a packet analyzer: a toolbar, a **display
+filter**, view tabs, and stacked list / detail / byte panes with a status bar.
+It needs no build step and loads nothing from the internet.
+
+| View | What it's for |
+|------|---------------|
+| **Alerts** | Every alert, colored by severity. Select one to dissect it: addresses, ports, the signature that fired, the **exact matched bytes** highlighted in the hex pane, and the source's history. Triage with **Acknowledge**, **False positive**, or **Reopen**. |
+| **Packets** | The live packet list, colored by protocol, following the newest packet. |
+| **Endpoints** | Every host seen today: traffic sent/received, peers, ports contacted, and alerts. Select one for its peers, ports, and alerts by signature. |
+| **Conversations** | One row per source → destination flow, biggest first. |
+| **Signatures** | Every loaded rule with 24 h / all-time hit counts. **Enable/disable** a rule, or **mute** it for 1 h / 24 h / 7 d (muted alerts are still logged but don't ask for triage). |
+| **I/O Graph** | Alerts over 1 h / 6 h / 24 h / 7 d stacked by severity, live throughput, and top signatures, sources, targets, categories, and protocol hierarchy. Click any bar or row to drill in. |
+| **Reports** | The archived daily reports, read in place. |
+
+**Display filter.** Type an expression and press Enter. The field turns green
+when the filter is valid and red (with the reason in the status bar) when it isn't:
+
+```
+sev >= high && !ip.src.internal
+ip.addr == 192.168.88.20 && status == new
+rule.id == RECON-PORTSCAN || category == web-attack
+tcp && dport == 22            port == 80 || port == 443
+bytes > 1m                    "union select"      (plain words search every text field)
+```
+
+Field names autocomplete as you type. Press `?` to list every field for the
+current view. Right-click any cell or detail row to **Apply as filter** (and
+*not* / *and* / *or* variants).
+
+**Keyboard.** `1`–`7` switch views, `/` focuses the filter, `j`/`k` move, `a`
+acknowledge, `f` false positive, `u` reopen, `m` mute the signature 1 h, `h`
+open the source host, `Space` pause live updates, `t` cycle light / dark /
+system theme.
+
+**At a glance.** The status bar's left dot is green when nothing is waiting and
+takes the worst untriaged severity otherwise. The tab title and favicon carry
+the untriaged count, so a background tab still tells you when something fired.
+
+Alert triage state and rule switches live in the SQLite alert database, not
+the rules file. They survive restarts, rule reloads, and the daily rollover.
+
 ## Quick start (any machine with Python 3.10+)
 
 ```bash
@@ -85,11 +128,11 @@ Rules live in `rules/default.rules.json`. Each rule:
 Match priority: `content` / `content_hex` / `regex` are all checked against the
 payload; `src_port`/`dst_port`/`protocol` filter first.
 
-Reload without restarting: click the **rules pill** in the dashboard header and
-hit **Reload from disk**, or `POST /api/rules/reload`. If the edited file is
-invalid (bad regex, duplicate id, unknown protocol…) the reload is rejected
-with a message naming the offending rule and the old ruleset stays active.
-The same pill opens a browser for every loaded signature.
+Reload without restarting: click **Reload rules** in the dashboard toolbar, or
+`POST /api/rules/reload`. If the edited file is invalid (bad regex, duplicate
+id, unknown protocol…) the reload is rejected with a message naming the
+offending rule and the old ruleset stays active. To switch a rule off without
+editing the file, use the **Signatures** view.
 
 ## ⚠️ Seeing the whole network, not just this host
 
@@ -116,9 +159,8 @@ starts fresh:
   breakdown, top talkers, and every alert of the day)
 - `nids-YYYY-MM-DD.json` — the same data as structured JSON
 
-The dashboard's **Daily Reports** card lists archives newest-first. Click a name
-(or **View**) to read the report in an in-page viewer, **Download** to save the
-`.txt`, or **.json** for the structured file. Endpoints: `GET /api/logs`,
+The dashboard's **Reports** view lists archives newest-first and shows the
+selected report in place, with **Download .txt** and **.json** buttons. Endpoints: `GET /api/logs`,
 `GET /api/logs/{name}` (add `?download=1` to force a download), and
 `POST /api/rollover` (trigger immediately). In the recommended deployment
 `IDS_LOG_DIR` lives on TrueNAS, so reports are retained on the NAS.
@@ -128,16 +170,38 @@ automatically at each rollover and on startup; set it to `0` to keep forever.
 
 ## Alert export & API security
 
-- **CSV export** — the ⬇ CSV button on the Security Alerts card (or
+- **CSV export** — **Export CSV** in the toolbar (or
   `GET /api/alerts.csv?limit=…&severity=…`) downloads the alert history for
-  spreadsheets / SIEM import.
-- The WebSocket feed and the state-changing endpoints (`POST /api/rollover`,
-  `POST /api/rules/reload`) reject cross-origin browser requests, so a web page
-  you happen to visit can't read your traffic feed or reset your stats.
+  spreadsheets / SIEM import. `id` and triage `status` are appended as the last
+  columns, so existing imports keep working.
+- The WebSocket feed and every state-changing endpoint (`POST /api/rollover`,
+  `POST /api/rules/reload`, `POST /api/alerts/status`,
+  `POST /api/rules/{id}/state`) reject cross-origin browser requests, so a web
+  page you happen to visit can't read your traffic feed or change your triage.
+- Each alert keeps up to 512 bytes of the triggering payload as evidence (the
+  window around the match), so the alert database now holds packet contents.
+  Treat it, and its NAS location, as sensitive.
 - The dashboard itself has **no authentication** — anyone who can reach the
   port sees your network activity. Bind it to a management network
   (`IDS_HOST`), or put it behind a reverse proxy with auth if it must be
   reachable more widely.
+
+## API
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /api/status` | version, capture mode, rules loaded / disabled |
+| `GET /api/snapshot` | live counters, 60 s bandwidth, recent packets |
+| `GET /api/alerts` | alert history; `limit`, `severity`, `status`, `host`, `rule_id`, `since`, `before_id` |
+| `GET /api/alerts/{id}` | one alert with payload evidence, match span, rule, and related counts |
+| `POST /api/alerts/status` | triage: `{"ids": [...], "status": "new" \| "ack" \| "fp"}` |
+| `GET /api/alerts/timeline` | alert counts per bucket and severity (`hours`, `buckets`) |
+| `GET /api/analytics` | top signatures / sources / targets / categories (`hours`) |
+| `GET /api/hosts`, `GET /api/hosts/{ip}` | endpoint table and per-host drill-down |
+| `GET /api/flows` | conversations |
+| `GET /api/rules`, `POST /api/rules/{id}/state` | signatures with hit counts; `{"enabled": bool, "mute_minutes": n}` |
+| `POST /api/rules/reload`, `POST /api/rollover` | reload rules from disk, archive the day now |
+| `GET /api/alerts.csv`, `GET /api/logs`, `GET /api/logs/{name}` | exports and daily reports |
 
 ## Tests
 
@@ -170,4 +234,8 @@ dashboard header and at `GET /api/status`; see
 [`CHANGELOG.md`](CHANGELOG.md) for what changed between versions.
 
 If you edited rules and just want them live, you don't need to redeploy at all —
-click **Reload from disk** in the signature browser or `POST /api/rules/reload`.
+click **Reload rules** in the toolbar or `POST /api/rules/reload`.
+
+Upgrading to 0.4.0 migrates the alert database in place. Alerts recorded before
+the upgrade are marked *acknowledged*, so the triage queue starts empty instead
+of holding your entire history.

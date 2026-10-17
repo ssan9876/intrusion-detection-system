@@ -13,3 +13,7 @@ data/
 Thumbs.db
 .idea/
 .vscode/
+
+# Impeccable session artifacts (review captures, decision-page logs)
+.impeccable/review/
+.impeccable/questions/

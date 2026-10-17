@@ -30,6 +30,9 @@ except BaseException:  # pragma: no cover
     # demo-mode fallback must survive that too.
     SCAPY_AVAILABLE = False
 
+# Bytes of payload kept with each alert as evidence for the hex view.
+EVIDENCE_BYTES = 512
+
 
 class Sensor:
     """Owns capture + detection, writing results into the Store."""
@@ -126,10 +129,23 @@ class Sensor:
             detail = getattr(rule, "detail", "") or (
                 payload[:120].decode("latin-1", "ignore") if payload else summary
             )
+            # Keep the evidence: a window of the payload containing the matched
+            # span, so the dashboard can show exactly which bytes fired the rule.
+            span = rule.find_match(payload) if hasattr(rule, "find_match") else None
+            offset = 0
+            if span and span[1] > EVIDENCE_BYTES:
+                offset = max(0, span[0] - EVIDENCE_BYTES // 4)
+            window = payload[offset: offset + EVIDENCE_BYTES] if payload else b""
+            muted = self.store.is_muted(rule.id, ts)
             alert = Alert(
                 ts=ts, rule_id=rule.id, rule_name=rule.name, severity=rule.severity,
                 category=rule.category, src=src, dst=dst, proto=proto, sport=sport,
                 dport=dport, detail=detail.strip(),
+                payload_hex=window.hex(), payload_offset=offset,
+                match_start=span[0] - offset if span else None,
+                match_end=min(span[1] - offset, len(window)) if span else None,
+                status="muted" if muted else "new",
+                status_ts=ts if muted else None,
             )
             self.store.record_alert(alert)
             if self.on_alert:
@@ -142,8 +158,10 @@ class Sensor:
 
     def _demo_loop(self) -> None:
         hosts = [f"192.168.88.{i}" for i in (10, 12, 20, 25, 42, 100, 150, 166)]
-        externals = ["8.8.8.8", "1.1.1.1", "140.82.112.3", "13.107.42.14",
-                     "151.101.1.69", "203.0.113.66", "198.51.100.23"]
+        # synthetic "internet" hosts come only from the RFC 5737 documentation
+        # ranges, so demo attacks never name a real third party as the attacker
+        externals = ["192.0.2.10", "192.0.2.77", "198.51.100.23", "198.51.100.140",
+                     "203.0.113.9", "203.0.113.66", "203.0.113.200"]
         benign_payloads = [
             b"GET /index.html HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Mozilla/5.0\r\n\r\n",
             b"GET /api/v1/status HTTP/1.1\r\nHost: dashboard.local\r\n\r\n",

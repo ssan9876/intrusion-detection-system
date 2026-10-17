@@ -98,6 +98,26 @@ class Rule:
         # A rule with no payload condition matches on header criteria alone.
         return True
 
+    def find_match(self, payload: bytes) -> tuple[int, int] | None:
+        """Byte span (start, end) of the evidence that made this rule fire.
+
+        Content / hex matches win over the regex because they are the exact
+        bytes the rule names. Payloads are decoded as latin-1 for regexes, which
+        maps bytes 1:1 onto characters, so regex offsets are byte offsets.
+        """
+        if not payload:
+            return None
+        if self._content_bytes is not None:
+            haystack = payload.lower() if (self.nocase and self.content is not None) else payload
+            i = haystack.find(self._content_bytes)
+            if i >= 0:
+                return i, i + len(self._content_bytes)
+        if self._regex is not None:
+            m = self._regex.search(payload.decode("latin-1", "ignore"))
+            if m and m.end() > m.start():
+                return m.start(), m.end()
+        return None
+
     def has_payload_condition(self) -> bool:
         return self._content_bytes is not None or self._regex is not None
 
@@ -125,6 +145,9 @@ class RuleSet:
             seen_ids.add(data["id"])
             rules.append(Rule(**data))
         return cls(rules=rules, source=path)
+
+    def by_id(self, rule_id: str) -> Rule | None:
+        return next((r for r in self.rules if r.id == rule_id), None)
 
     def __len__(self) -> int:
         return len(self.rules)
